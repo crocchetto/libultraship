@@ -10,7 +10,7 @@ static std::shared_ptr<Ship::ResourceManager> sResourceManager;
 
 static Ship::ResourceManager* GetResourceManager() {
     if (!sResourceManager) {
-        sResourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ResourceManager>();
+        sResourceManager = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>();
     }
     return sResourceManager.get();
 }

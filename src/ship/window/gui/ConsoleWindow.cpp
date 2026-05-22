@@ -202,7 +202,7 @@ int32_t ConsoleWindow::SetCommand(std::shared_ptr<Console> console, const std::v
 
     int vType = CheckVarType(args[2]);
 
-    auto consoleVariables = Ship::Context::GetInstance()->GetChildren().GetFirst<ConsoleVariable>();
+    auto consoleVariables = Ship::Context::GetCurrent()->GetChildren().GetFirst<ConsoleVariable>();
 
     if (vType == VARTYPE_STRING) {
         consoleVariables->SetString(args[1].c_str(), args[2].c_str());
@@ -235,7 +235,7 @@ int32_t ConsoleWindow::GetCommand(std::shared_ptr<Console> console, const std::v
         return 1;
     }
 
-    auto cvar = Ship::Context::GetInstance()->GetChildren().GetFirst<ConsoleVariable>()->Get(args[1].c_str());
+    auto cvar = Ship::Context::GetCurrent()->GetChildren().GetFirst<ConsoleVariable>()->Get(args[1].c_str());
 
     if (cvar != nullptr) {
         if (cvar->Type == ConsoleVariableType::Integer) {
@@ -309,7 +309,7 @@ static std::shared_ptr<ConsoleWindow> GetCachedConsoleWindow() {
     static std::weak_ptr<ConsoleWindow> sCache;
     auto cached = sCache.lock();
     if (!cached) {
-        auto ctx = Context::GetInstance();
+        auto ctx = Context::GetCurrent();
         if (!ctx) {
             return nullptr;
         }

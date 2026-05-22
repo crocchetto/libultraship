@@ -795,7 +795,7 @@ TEST(ComponentSearchTest, GetInParentsFindsAllAncestors) {
 // maps each name to the concrete class in the appropriate namespace.
 
 // Helper: create a fresh Context instance for each test, then destroy it afterward.
-// Uses CreateInstance so that Context::GetInstance() returns the context during the test,
+// Uses CreateInstance so that Context::GetCurrent() returns the context during the test,
 // satisfying components (e.g. ConsoleVariable) that look up siblings via the singleton.
 // The context singleton is a weak_ptr; when the returned shared_ptr goes out of scope at
 // the end of the test, the weak_ptr expires and the next test can create a fresh one.

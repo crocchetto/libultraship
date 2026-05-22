@@ -139,7 +139,7 @@ void CrashHandler::PrintRegisters(ucontext_t* ctx) {
 }
 
 static void ErrorHandler(int sig, siginfo_t* sigInfo, void* data) {
-    std::shared_ptr<CrashHandler> crashHandler = Context::GetInstance()->GetChildren().GetFirst<CrashHandler>();
+    std::shared_ptr<CrashHandler> crashHandler = Context::GetCurrent()->GetChildren().GetFirst<CrashHandler>();
     char intToCharBuffer[16];
 
     std::array<void*, 4096> arr;
@@ -191,14 +191,14 @@ static void ErrorHandler(int sig, siginfo_t* sigInfo, void* data) {
         WRITE_VAR_LINE(crashHandler, intToCharBuffer, functionName.c_str());
     }
     SDL_ShowSimpleMessageBox(
-        SDL_MESSAGEBOX_ERROR, (Context::GetInstance()->GetName() + " has crashed").c_str(),
-        (Context::GetInstance()->GetName() + " has crashed. Please upload the logs to the support channel in discord.")
+        SDL_MESSAGEBOX_ERROR, (Context::GetCurrent()->GetName() + " has crashed").c_str(),
+        (Context::GetCurrent()->GetName() + " has crashed. Please upload the logs to the support channel in discord.")
             .c_str(),
         nullptr);
     free(symbols);
     crashHandler->PrintCommon();
 
-    if (auto loggerComponent = Context::GetInstance()->GetChildren().GetFirst<Logger>()) {
+    if (auto loggerComponent = Context::GetCurrent()->GetChildren().GetFirst<Logger>()) {
         loggerComponent->Get()->flush();
     }
     spdlog::shutdown();
@@ -393,7 +393,7 @@ void CrashHandler::PrintStack(CONTEXT* ctx) {
         }
     }
     PrintCommon();
-    if (auto loggerComponent = Context::GetInstance()->GetChildren().GetFirst<Logger>()) {
+    if (auto loggerComponent = Context::GetCurrent()->GetChildren().GetFirst<Logger>()) {
         loggerComponent->Get()->flush();
     }
     spdlog::shutdown();
@@ -402,7 +402,7 @@ void CrashHandler::PrintStack(CONTEXT* ctx) {
 
 extern "C" LONG WINAPI seh_filter(PEXCEPTION_POINTERS ex) {
     char exceptionString[20];
-    std::shared_ptr<CrashHandler> crashHandler = Context::GetInstance()->GetChildren().GetFirst<CrashHandler>();
+    std::shared_ptr<CrashHandler> crashHandler = Context::GetCurrent()->GetChildren().GetFirst<CrashHandler>();
 
     snprintf(exceptionString, std::size(exceptionString), "0x%x", ex->ExceptionRecord->ExceptionCode);
 
@@ -410,7 +410,7 @@ extern "C" LONG WINAPI seh_filter(PEXCEPTION_POINTERS ex) {
     crashHandler->PrintStack(ex->ContextRecord);
     MessageBoxA(
         nullptr,
-        (Context::GetInstance()->GetName() + " has crashed. Please upload the logs to the support channel in discord.")
+        (Context::GetCurrent()->GetName() + " has crashed. Please upload the logs to the support channel in discord.")
             .c_str(),
         "Crash", MB_OK | MB_ICONERROR);
 

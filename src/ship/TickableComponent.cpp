@@ -9,7 +9,7 @@ namespace Ship {
 TickableComponent::TickableComponent(const std::string& name, std::shared_ptr<Context> context,
                                      const TickGroup tickGroup, const TickPriority tickPriority,
                                      const std::vector<EventID>& eventIds)
-    : Tickable(false), Component(name), mTickGroup(tickGroup), mTickPriority(tickPriority), mContext(context),
+    : Tickable(false), Component(name, context), mTickGroup(tickGroup), mTickPriority(tickPriority), mContext(context),
       mPendingEventIds(eventIds) {
     // Note: Actions and context registration are deferred to RegisterWithContext()
     // because shared_from_this() cannot be called in a constructor.
@@ -18,7 +18,8 @@ TickableComponent::TickableComponent(const std::string& name, std::shared_ptr<Co
 TickableComponent::TickableComponent(const std::string& name, std::shared_ptr<Context> context,
                                      const TickGroup tickGroup, const TickPriority tickPriority,
                                      const std::vector<std::shared_ptr<Action>>& actions)
-    : Tickable(true, actions), Component(name), mTickGroup(tickGroup), mTickPriority(tickPriority), mContext(context) {
+    : Tickable(true, actions), Component(name, context), mTickGroup(tickGroup), mTickPriority(tickPriority),
+      mContext(context) {
 }
 
 TickableComponent::~TickableComponent() {

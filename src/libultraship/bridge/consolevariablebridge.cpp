@@ -5,7 +5,7 @@ static std::shared_ptr<Ship::ConsoleVariable> sConsoleVariable;
 
 static Ship::ConsoleVariable* GetConsoleVariable() {
     if (!sConsoleVariable) {
-        sConsoleVariable = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ConsoleVariable>();
+        sConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
     }
     return sConsoleVariable.get();
 }

@@ -38,7 +38,7 @@
 namespace Ship {
 std::weak_ptr<Context> Context::mContext;
 
-std::shared_ptr<Context> Context::GetInstance() {
+std::shared_ptr<Context> Context::GetCurrent() {
     return mContext.lock();
 }
 
@@ -78,7 +78,7 @@ std::shared_ptr<Context> Context::CreateDefaultInstance(const std::string& name,
                                                         std::shared_ptr<Component> controlDeck) {
     if (!mContext.expired()) {
         SPDLOG_DEBUG("Trying to create a context when it already exists. Returning existing.");
-        return GetInstance();
+        return GetCurrent();
     }
 
     auto shared = std::make_shared<Context>(name, shortName);
@@ -393,7 +393,7 @@ bool Context::BuildComponentsFromJson(std::shared_ptr<Context> context, const nl
 std::shared_ptr<Context> Context::CreateInstance(const std::string& name, const std::string& shortName) {
     if (!mContext.expired()) {
         SPDLOG_DEBUG("Trying to create a context when it already exists. Returning existing.");
-        return GetInstance();
+        return GetCurrent();
     }
 
     auto shared = std::make_shared<Context>(name, shortName);
@@ -519,7 +519,7 @@ std::string Context::GetAppDirectoryPath(const std::string& appName) {
 #endif
 
 #ifdef NON_PORTABLE
-    const std::string& effectiveAppName = appName.empty() ? GetInstance()->mShortName : appName;
+    const std::string& effectiveAppName = appName.empty() ? GetCurrent()->mShortName : appName;
     char* prefpath = SDL_GetPrefPath(NULL, effectiveAppName.c_str());
     if (prefpath != NULL) {
         std::string ret(prefpath);
@@ -564,6 +564,19 @@ TickableList& Context::GetTickableComponents() {
 
 const TickableList& Context::GetTickableComponents() const {
     return mTickableComponents;
+}
+
+void Context::Tick() {
+    const auto now = std::chrono::steady_clock::now();
+    double durationSinceLastTick = 0.0;
+    if (mLastTickTime != std::chrono::steady_clock::time_point{}) {
+        durationSinceLastTick = std::chrono::duration<double>(now - mLastTickTime).count();
+    }
+    mLastTickTime = now;
+
+    for (const auto& tickable : *mTickableComponents.Get()) {
+        tickable->Run(durationSinceLastTick);
+    }
 }
 
 } // namespace Ship

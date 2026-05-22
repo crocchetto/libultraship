@@ -6,7 +6,7 @@ static std::shared_ptr<Ship::ControlDeck> sControlDeck;
 
 static Ship::ControlDeck* GetControlDeck() {
     if (!sControlDeck) {
-        sControlDeck = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ControlDeck>();
+        sControlDeck = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ControlDeck>();
     }
     return sControlDeck.get();
 }

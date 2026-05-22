@@ -11,7 +11,7 @@ static std::shared_ptr<Ship::ScriptLoader> sScriptLoader;
 
 static Ship::ScriptLoader* GetScriptLoader() {
     if (!sScriptLoader) {
-        sScriptLoader = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ScriptLoader>();
+        sScriptLoader = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ScriptLoader>();
     }
     return sScriptLoader.get();
 }

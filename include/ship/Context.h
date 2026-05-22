@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <vector>
 #include <unordered_map>
+#include <chrono>
 #include <stdint.h>
 #include "ship/audio/Audio.h"
 #include "ship/Component.h"
@@ -64,7 +65,7 @@ class Context : public Component {
      * @brief Returns the currently active global Context instance.
      * @return Shared pointer to the Context, or an empty pointer if none exists.
      */
-    static std::shared_ptr<Context> GetInstance();
+    static std::shared_ptr<Context> GetCurrent();
 
     /**
      * @brief Creates and stores the global Context instance with the default set of components.
@@ -192,6 +193,14 @@ class Context : public Component {
     TickableList& GetTickableComponents();
     const TickableList& GetTickableComponents() const;
 
+    /**
+     * @brief Drives one frame of all registered TickableComponents.
+     *
+     * Computes the duration since the previous Context::Tick() call and runs
+     * all tickables in list order.
+     */
+    void Tick();
+
   protected:
     Context() = default;
 
@@ -199,6 +208,7 @@ class Context : public Component {
     static std::weak_ptr<Context> mContext;
 
     std::string mShortName;
+    std::chrono::steady_clock::time_point mLastTickTime{};
 
     TickableList mTickableComponents;
 #ifdef COMPONENT_THREAD_SAFE

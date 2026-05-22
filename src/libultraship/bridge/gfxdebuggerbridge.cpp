@@ -8,7 +8,7 @@ static std::shared_ptr<Fast::GfxDebugger> sGfxDebugger;
 
 static Fast::GfxDebugger* GetGfxDebugger() {
     if (!sGfxDebugger) {
-        sGfxDebugger = Ship::Context::GetInstance()->GetChildren().GetFirst<Fast::GfxDebugger>();
+        sGfxDebugger = Ship::Context::GetCurrent()->GetChildren().GetFirst<Fast::GfxDebugger>();
     }
     return sGfxDebugger.get();
 }

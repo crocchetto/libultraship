@@ -6,7 +6,7 @@ static std::shared_ptr<Ship::Events> sEvents;
 
 static Ship::Events* GetEvents() {
     if (!sEvents) {
-        sEvents = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Events>();
+        sEvents = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Events>();
     }
     return sEvents.get();
 }

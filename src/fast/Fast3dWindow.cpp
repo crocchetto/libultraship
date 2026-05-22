@@ -365,7 +365,7 @@ const char* Fast3dWindow::GetKeyName(int32_t scancode) {
 
 bool Fast3dWindow::KeyUp(int32_t scancode) {
     auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     if (!wnd) {
         return false;
     }
@@ -385,7 +385,7 @@ bool Fast3dWindow::KeyUp(int32_t scancode) {
 
 bool Fast3dWindow::KeyDown(int32_t scancode) {
     auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     if (!wnd) {
         return false;
     }
@@ -398,7 +398,7 @@ bool Fast3dWindow::KeyDown(int32_t scancode) {
 
 void Fast3dWindow::AllKeysUp() {
     auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     if (!wnd) {
         return;
     }
@@ -409,7 +409,7 @@ void Fast3dWindow::AllKeysUp() {
 
 bool Fast3dWindow::MouseButtonUp(int button) {
     auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     if (!wnd) {
         return false;
     }
@@ -419,7 +419,7 @@ bool Fast3dWindow::MouseButtonUp(int button) {
 
 bool Fast3dWindow::MouseButtonDown(int button) {
     auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     if (!wnd) {
         return false;
     }
@@ -429,7 +429,7 @@ bool Fast3dWindow::MouseButtonDown(int button) {
 
 void Fast3dWindow::OnFullscreenChanged(bool isNowFullscreen) {
     auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     if (!wnd) {
         return;
     }

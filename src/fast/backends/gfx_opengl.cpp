@@ -741,8 +741,8 @@ void GfxRenderingAPIOGL::Init() {
 
     glGetIntegerv(GL_MAX_SAMPLES, &mMaxMsaaLevel);
 
-    mConsoleVariable = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    sOGLResourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ResourceManager>();
+    mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
+    sOGLResourceManager = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>();
 }
 
 void GfxRenderingAPIOGL::OnResize() {

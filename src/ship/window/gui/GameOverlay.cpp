@@ -12,7 +12,10 @@
 #include "ship/utils/StringHelper.h"
 
 namespace Ship {
-GameOverlay::GameOverlay() : Component("GameOverlay") {
+GameOverlay::GameOverlay(std::shared_ptr<Context> context, std::shared_ptr<ResourceManager> resourceManager,
+                         std::shared_ptr<ConsoleVariable> consoleVariables, std::shared_ptr<Window> window)
+    : Component("GameOverlay", std::move(context)), mResourceManager(std::move(resourceManager)),
+      mConsoleVariables(std::move(consoleVariables)), mWindow(std::move(window)) {
 }
 
 GameOverlay::~GameOverlay() {
@@ -157,10 +160,25 @@ ImVec2 GameOverlay::CalculateTextSize(const char* text, const char* textEnd, boo
 }
 
 void GameOverlay::OnInit(const nlohmann::json& /*initArgs*/) {
-    auto context = RequireDependency(GetContext(), "Context");
-    mResourceManager = RequireDependency(context->GetChildren().GetFirst<ResourceManager>(), "ResourceManager");
-    mConsoleVariables = RequireDependency(context->GetChildren().GetFirst<ConsoleVariable>(), "ConsoleVariable");
-    mWindow = RequireDependency(context->GetChildren().GetFirst<Window>(), "Window");
+    if (!mResourceManager || !mConsoleVariables || !mWindow) {
+        auto context = GetContext();
+        if (!context) {
+            throw std::runtime_error("Component 'GameOverlay' requires dependency 'Context' to exist before use");
+        }
+        if (!mResourceManager) {
+            mResourceManager = context->GetChildren().GetFirst<ResourceManager>();
+        }
+        if (!mConsoleVariables) {
+            mConsoleVariables = context->GetChildren().GetFirst<ConsoleVariable>();
+        }
+        if (!mWindow) {
+            mWindow = context->GetChildren().GetFirst<Window>();
+        }
+    }
+
+    mResourceManager = RequireDependency(mResourceManager, "ResourceManager");
+    mConsoleVariables = RequireDependency(mConsoleVariables, "ConsoleVariable");
+    mWindow = RequireDependency(mWindow, "Window");
 
     mResourceManager->GetResourceLoader()->RegisterResourceFactory(std::make_shared<ResourceFactoryBinaryFontV0>(),
                                                                    RESOURCE_FORMAT_BINARY, "Font",

@@ -432,16 +432,16 @@ void GfxWindowBackendSDL2::Init(const char* gameName, const char* gfxApiName, bo
         window_impl.Metal = { mWnd, mRenderer };
     }
 
-    if (auto window = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>()) {
+    if (auto window = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>()) {
         mFast3dGui = std::dynamic_pointer_cast<Fast::Fast3dGui>(window->GetGui());
         if (mFast3dGui) {
             mFast3dGui->Init(window_impl);
         }
     }
 
-    mConsoleVariable = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    mConfig = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Config>();
-    mFileDrop = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::FileDrop>();
+    mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
+    mConfig = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Config>();
+    mFileDrop = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::FileDrop>();
 
     for (size_t i = 0; i < std::size(lus_to_sdl_table); i++) {
         mSdlToLusTable[lus_to_sdl_table[i]] = i;

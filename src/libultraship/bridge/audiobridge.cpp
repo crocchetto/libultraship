@@ -6,7 +6,7 @@ static std::shared_ptr<Ship::Audio> sAudio;
 
 static Ship::Audio* GetAudio() {
     if (!sAudio) {
-        sAudio = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Audio>();
+        sAudio = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Audio>();
     }
     return sAudio.get();
 }

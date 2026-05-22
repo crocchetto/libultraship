@@ -615,7 +615,7 @@ void GfxWindowBackendDXGI::Init(const char* game_name, const char* gfx_api_name,
     mRawInputDevice[0].hwndTarget = h_wnd;
     RegisterRawInputDevices(mRawInputDevice, 1, sizeof(mRawInputDevice[0]));
 
-    auto ctx = Ship::Context::GetInstance();
+    auto ctx = Ship::Context::GetCurrent();
     mConfig = ctx->GetChildren().GetFirst<Ship::Config>();
     mFileDrop = ctx->GetChildren().GetFirst<Ship::FileDrop>();
     mConsoleVariable = ctx->GetChildren().GetFirst<Ship::ConsoleVariable>();

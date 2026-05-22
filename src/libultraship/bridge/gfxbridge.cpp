@@ -11,7 +11,7 @@ static std::shared_ptr<Fast::Fast3dWindow> sFast3dWindow;
 static Fast::Fast3dWindow* GetFast3dWindow() {
     if (!sFast3dWindow) {
         sFast3dWindow = std::dynamic_pointer_cast<Fast::Fast3dWindow>(
-            Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>());
+            Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
     }
     return sFast3dWindow.get();
 }

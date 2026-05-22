@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 #include <algorithm>
-#include <chrono>
 #include <queue>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
@@ -32,7 +31,7 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
      * @brief Constructs a Component with the given name.
      * @param name A human-readable name for this Component.
      */
-    explicit Component(const std::string& name);
+    explicit Component(const std::string& name, std::shared_ptr<Context> context = nullptr);
     virtual ~Component();
 
     /**
@@ -94,18 +93,6 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
      * override this to use the base whose weak_ptr is properly initialized by make_shared.
      */
     virtual std::shared_ptr<Component> GetSharedComponent();
-
-    /**
-     * @brief Drives one tick of all TickableComponents registered with this Component's Context.
-     *
-     * Computes the elapsed time since the previous call (using a steady clock) and
-     * runs every TickableComponent in the Context's TickableList in their registered
-     * order. Subsequent calls to Tick() on other Components sharing the same Context
-     * each maintain their own independent last-tick timestamp.
-     *
-     * If this Component has no associated Context the call is a no-op.
-     */
-    void Tick();
 
     // ---- Breadth-first hierarchy search ----
 
@@ -198,7 +185,6 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
     bool mIsInitialized = false;
     ComponentList mParents;
     ComponentList mChildren;
-    std::chrono::steady_clock::time_point mLastTickTime{};
 };
 
 // ---- Template BFS implementations (children) ----

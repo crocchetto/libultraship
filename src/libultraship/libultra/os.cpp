@@ -32,7 +32,7 @@ int32_t osContInit(OSMesgQueue* mq, uint8_t* controllerBits, OSContStatus* statu
         exit(EXIT_FAILURE);
     }
 
-    sControlDeck = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ControlDeck>();
+    sControlDeck = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ControlDeck>();
     if (!sControlDeck) {
         SPDLOG_ERROR("osContInit: ControlDeck not found in context");
         return -1;

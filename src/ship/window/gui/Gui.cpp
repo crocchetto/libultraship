@@ -23,8 +23,15 @@ namespace Ship {
 #define TOGGLE_BTN ImGuiKey_F1
 #define TOGGLE_PAD_BTN ImGuiKey_GamepadBack
 
-Gui::Gui(std::vector<std::shared_ptr<GuiWindow>> guiWindows) : Component("Gui"), mNeedsConsoleVariableSave(false) {
-    mGameOverlay = std::make_shared<GameOverlay>();
+Gui::Gui(std::vector<std::shared_ptr<GuiWindow>> guiWindows, std::shared_ptr<Context> context,
+         std::shared_ptr<ConsoleVariable> consoleVariable, std::shared_ptr<Window> window, std::shared_ptr<Config> config,
+         std::shared_ptr<ResourceManager> resourceManager, std::shared_ptr<GameOverlay> gameOverlay)
+    : Component("Gui", std::move(context)), mNeedsConsoleVariableSave(false), mGameOverlay(std::move(gameOverlay)),
+      mConsoleVariable(std::move(consoleVariable)), mWindow(std::move(window)), mConfig(std::move(config)),
+      mResourceManager(std::move(resourceManager)) {
+    if (!mGameOverlay) {
+        mGameOverlay = std::make_shared<GameOverlay>(GetContext(), mResourceManager, mConsoleVariable, mWindow);
+    }
 
     for (auto& guiWindow : guiWindows) {
         AddGuiWindow(guiWindow);
@@ -39,11 +46,28 @@ Gui::~Gui() {
 }
 
 void Gui::OnInit(const nlohmann::json& initArgs) {
-    auto context = RequireDependency(GetContext(), "Context");
-    mConsoleVariable = RequireDependency(context->GetChildren().GetFirst<ConsoleVariable>(), "ConsoleVariable");
-    mWindow = RequireDependency(context->GetChildren().GetFirst<Window>(), "Window");
-    mConfig = RequireDependency(context->GetChildren().GetFirst<Config>(), "Config");
-    mResourceManager = RequireDependency(context->GetChildren().GetFirst<ResourceManager>(), "ResourceManager");
+    auto context = GetContext();
+    if ((!mConsoleVariable || !mWindow || !mConfig || !mResourceManager) && !context) {
+        throw std::runtime_error("Component 'Gui' requires dependency 'Context' to exist before use");
+    }
+
+    if (!mConsoleVariable) {
+        mConsoleVariable = context->GetChildren().GetFirst<ConsoleVariable>();
+    }
+    if (!mWindow) {
+        mWindow = context->GetChildren().GetFirst<Window>();
+    }
+    if (!mConfig) {
+        mConfig = context->GetChildren().GetFirst<Config>();
+    }
+    if (!mResourceManager) {
+        mResourceManager = context->GetChildren().GetFirst<ResourceManager>();
+    }
+
+    mConsoleVariable = RequireDependency(mConsoleVariable, "ConsoleVariable");
+    mWindow = RequireDependency(mWindow, "Window");
+    mConfig = RequireDependency(mConfig, "Config");
+    mResourceManager = RequireDependency(mResourceManager, "ResourceManager");
 
     // Add default windows now that deps are available
     if (GetGuiWindow("Stats") == nullptr) {
@@ -105,6 +129,7 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
 
     // Add GameOverlay as a child component so it participates in the hierarchy
     // and receives the correct Context. Then initialise it.
+    mGameOverlay->SetContext(GetContext());
     GetChildren().Add(mGameOverlay);
     mGameOverlay->Init({});
 

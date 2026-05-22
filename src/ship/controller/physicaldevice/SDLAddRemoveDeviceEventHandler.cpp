@@ -18,7 +18,7 @@ SDLAddRemoveDeviceEventHandler::~SDLAddRemoveDeviceEventHandler() {
 
 void SDLAddRemoveDeviceEventHandler::OnInit(const nlohmann::json& initArgs) {
     GuiWindow::OnInit(initArgs);
-    mControlDeck = Context::GetInstance()->GetChildren().GetFirst<ControlDeck>();
+    mControlDeck = Context::GetCurrent()->GetChildren().GetFirst<ControlDeck>();
 }
 
 void SDLAddRemoveDeviceEventHandler::DrawElement() {

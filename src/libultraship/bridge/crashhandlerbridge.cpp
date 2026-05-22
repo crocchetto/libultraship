@@ -6,7 +6,7 @@ static std::shared_ptr<Ship::CrashHandler> sCrashHandler;
 
 static Ship::CrashHandler* GetCrashHandler() {
     if (!sCrashHandler) {
-        sCrashHandler = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::CrashHandler>();
+        sCrashHandler = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::CrashHandler>();
     }
     return sCrashHandler.get();
 }

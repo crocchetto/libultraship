@@ -158,7 +158,7 @@ std::shared_ptr<ResourceInitData> ResourceLoader::ReadResourceInitData(const std
     auto initData = CreateDefaultResourceInitData();
 
     if (!mResourceManager) {
-        auto context = Context::GetInstance();
+        auto context = Context::GetCurrent();
         if (context == nullptr) {
             SPDLOG_ERROR("Failed to read resource init data for {}: no active context", filePath);
             return initData;
@@ -204,7 +204,7 @@ std::shared_ptr<IResource> ResourceLoader::LoadResource(std::string filePath, st
 
     if (initData == nullptr) {
         if (!mResourceManager) {
-            auto context = Context::GetInstance();
+            auto context = Context::GetCurrent();
             if (context == nullptr) {
                 SPDLOG_ERROR("Failed to load resource {}: no active context", filePath);
                 return nullptr;
@@ -312,7 +312,7 @@ ResourceLoader::ReadResourceInitDataXml(const std::string& filePath, std::shared
     resourceInitData->Format = RESOURCE_FORMAT_XML;
 
     auto root = document->FirstChildElement();
-    auto context = Context::GetInstance();
+    auto context = Context::GetCurrent();
     if (context == nullptr) {
         SPDLOG_ERROR("Error reading OTR header from XML: No active context for file {}", filePath);
         return resourceInitData;

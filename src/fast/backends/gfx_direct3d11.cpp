@@ -359,7 +359,7 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
     Fast::GuiWindowInitData window_impl;
     window_impl.Dx11 = { mWindowBackend->GetWindowHandle(), mContext.Get(), mDevice.Get() };
-    auto ctx = Ship::Context::GetInstance();
+    auto ctx = Ship::Context::GetCurrent();
     mConsoleVariable = ctx->GetChildren().GetFirst<Ship::ConsoleVariable>();
     mResourceManager = ctx->GetChildren().GetFirst<Ship::ResourceManager>();
     sDX11ResourceManager = mResourceManager;

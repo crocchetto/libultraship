@@ -44,7 +44,8 @@ struct Overlay {
  */
 class GameOverlay : public Component {
   public:
-    GameOverlay();
+    GameOverlay(std::shared_ptr<Context> context = nullptr, std::shared_ptr<ResourceManager> resourceManager = nullptr,
+                std::shared_ptr<ConsoleVariable> consoleVariables = nullptr, std::shared_ptr<Window> window = nullptr);
     virtual ~GameOverlay();
 
     /** @brief Initialises the overlay and loads the default font. */

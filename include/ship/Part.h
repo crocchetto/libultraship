@@ -25,6 +25,8 @@ class Part {
   public:
     /** @brief Constructs a Part and assigns it a unique ID. */
     Part();
+    /** @brief Constructs a Part with an explicit Context reference and unique ID. */
+    explicit Part(std::shared_ptr<Context> context);
     virtual ~Part() = default;
 
     /** @brief Returns the unique identifier for this Part. */

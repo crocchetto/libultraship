@@ -6,7 +6,7 @@ static std::shared_ptr<Ship::Window> sWindow;
 
 static Ship::Window* GetWindow() {
     if (!sWindow) {
-        sWindow = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>();
+        sWindow = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>();
     }
     return sWindow.get();
 }

@@ -7,6 +7,9 @@ std::atomic<uint64_t> Part::sNextPartId = 0;
 Part::Part() : mId(sNextPartId++) {
 }
 
+Part::Part(std::shared_ptr<Context> context) : mId(sNextPartId++), mContext(std::move(context)) {
+}
+
 uint64_t Part::GetId() const {
     return mId;
 }
