@@ -196,8 +196,7 @@ void GfxRenderingAPIMetal::Init() {
     autorelease_pool->release();
 
     mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    gfx_metal_shader_set_resource_manager(
-        Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>());
+    gfx_metal_shader_set_resource_manager(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>());
 }
 
 struct GfxClipParameters GfxRenderingAPIMetal::GetClipParameters() {

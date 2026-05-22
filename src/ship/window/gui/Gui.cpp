@@ -24,8 +24,9 @@ namespace Ship {
 #define TOGGLE_PAD_BTN ImGuiKey_GamepadBack
 
 Gui::Gui(std::vector<std::shared_ptr<GuiWindow>> guiWindows, std::shared_ptr<Context> context,
-         std::shared_ptr<ConsoleVariable> consoleVariable, std::shared_ptr<Window> window, std::shared_ptr<Config> config,
-         std::shared_ptr<ResourceManager> resourceManager, std::shared_ptr<GameOverlay> gameOverlay)
+         std::shared_ptr<ConsoleVariable> consoleVariable, std::shared_ptr<Window> window,
+         std::shared_ptr<Config> config, std::shared_ptr<ResourceManager> resourceManager,
+         std::shared_ptr<GameOverlay> gameOverlay)
     : Component("Gui", std::move(context)), mNeedsConsoleVariableSave(false), mGameOverlay(std::move(gameOverlay)),
       mConsoleVariable(std::move(consoleVariable)), mWindow(std::move(window)), mConfig(std::move(config)),
       mResourceManager(std::move(resourceManager)) {
