@@ -53,7 +53,8 @@ class ActionList : public PartList<Action> {
 
     template <typename T> bool Has(EventID eventId) const;
     template <typename T> std::shared_ptr<std::vector<std::shared_ptr<T>>> Get(EventID eventId) const;
-    template <typename T> std::shared_ptr<std::vector<std::shared_ptr<T>>> Get(const std::vector<EventID>& eventIds) const;
+    template <typename T>
+    std::shared_ptr<std::vector<std::shared_ptr<T>>> Get(const std::vector<EventID>& eventIds) const;
     template <typename T> std::shared_ptr<T> GetFirst(EventID eventId) const;
 
   protected:
@@ -85,17 +86,17 @@ inline std::shared_ptr<std::vector<std::shared_ptr<Action>>> ActionList::Get(Eve
         if (action->GetEventId() == eventId) {
             result->push_back(action);
         }
-
-        inline std::shared_ptr<Action> ActionList::GetFirst(EventID eventId) const {
-            for (const auto& action : this->GetList()) {
-                if (action->GetEventId() == eventId) {
-                    return action;
-                }
-            }
-            return nullptr;
-        }
     }
     return result;
+}
+
+inline std::shared_ptr<Action> ActionList::GetFirst(EventID eventId) const {
+    for (const auto& action : this->GetList()) {
+        if (action->GetEventId() == eventId) {
+            return action;
+        }
+    }
+    return nullptr;
 }
 
 inline std::shared_ptr<std::vector<std::shared_ptr<Action>>>

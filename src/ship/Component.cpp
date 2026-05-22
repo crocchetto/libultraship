@@ -81,12 +81,4 @@ void Component::SetContext(std::shared_ptr<Context> context) {
     mContext = context;
 }
 
-void Component::OnAdded(bool /*forced*/) {
-    SetContext(GetFirstInParents<Context>());
-}
-
-void Component::OnRemoved(bool /*forced*/) {
-    SetContext(GetFirstInParents<Context>());
-}
-
 } // namespace Ship

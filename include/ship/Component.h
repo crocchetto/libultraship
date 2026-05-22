@@ -80,6 +80,16 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
      */
     virtual double Tick();
 
+    /**
+     * @brief Returns the Context associated with this component (if any).
+     */
+    std::shared_ptr<Context> GetContext() const;
+
+    /**
+     * @brief Sets or clears the Context reference associated with this component.
+     */
+    void SetContext(std::shared_ptr<Context> context);
+
     // ---- Parent/child relationship accessors ----
 
     /** @brief Returns a mutable reference to the parent list. */
@@ -187,20 +197,9 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
     template <typename T>
     std::shared_ptr<T> RequireDependency(const std::shared_ptr<T>& dependency, const std::string& dependencyName) const;
 
-    /**
-     * @brief Returns the Context associated with this component (if any).
-     */
-    std::shared_ptr<Context> GetContext() const;
-
-    /**
-     * @brief Sets or clears the Context reference associated with this component.
-     */
-    void SetContext(std::shared_ptr<Context> context);
-
-    void OnAdded(bool forced) override;
-    void OnRemoved(bool forced) override;
-
   private:
+    template <typename> friend class PartList;
+
     std::string mName;
     bool mIsInitialized = false;
     ComponentList mParents;

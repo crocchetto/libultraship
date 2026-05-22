@@ -1,5 +1,6 @@
 #include "ship/controller/physicaldevice/SDLAddRemoveDeviceEventHandler.h"
 #include <SDL2/SDL.h>
+#include "ship/Context.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 
 namespace Ship {

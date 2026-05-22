@@ -276,6 +276,7 @@ TEST_F(TickableComponentTest, AutoRegistrationWhenFirstParentAdded) {
     // ConcreteTickable is added as a child of a parent component.
     // The ComponentList Parents hook should auto-register with Context's TickableList.
     auto parent = std::make_shared<Component>("Parent");
+    mContext->GetChildren().Add(parent);
     auto tc = std::make_shared<ConcreteTickable>(mContext);
 
     // Adding tc as child of parent causes parent to be added to tc's parents list,
@@ -292,6 +293,7 @@ TEST_F(TickableComponentTest, AutoRegistrationWhenFirstParentAdded) {
 
 TEST_F(TickableComponentTest, AutoUnregistrationWhenLastParentRemoved) {
     auto parent = std::make_shared<Component>("Parent");
+    mContext->GetChildren().Add(parent);
     auto tc = std::make_shared<ConcreteTickable>(mContext);
 
     parent->GetChildren().Add(tc);

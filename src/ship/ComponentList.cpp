@@ -17,6 +17,14 @@ void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
     auto ownerShared = mOwner->GetSharedComponent();
 
     if (mRole == ComponentListRole::Children) {
+        auto context = std::dynamic_pointer_cast<Context>(ownerShared);
+        if (!context) {
+            context = ownerShared->GetContext();
+        }
+        if (context) {
+            part->SetContext(context);
+        }
+
         // Ensure the TickableComponent part has its mWeakSelf initialized before
         // the bidirectional sync fires (which calls part->GetSharedComponent()).
         if (auto tickable = std::dynamic_pointer_cast<TickableComponent>(part)) {
@@ -27,6 +35,15 @@ void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
             part->GetParents().Add(ownerShared, forced);
         }
     } else if (mRole == ComponentListRole::Parents) {
+        auto context = std::dynamic_pointer_cast<Context>(part);
+        if (!context) {
+            context = part->GetContext();
+        }
+        if (context) {
+            ownerShared->SetContext(context);
+            mContext = context;
+        }
+
         // Add the owner as a child of the parent (if not already present)
         if (!part->GetChildren().Has(ownerShared)) {
             part->GetChildren().Add(ownerShared, forced);
@@ -34,13 +51,6 @@ void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
 
         // Register TickableComponent with the Context's global TickableList when it gets its first parent
         auto tickable = std::dynamic_pointer_cast<TickableComponent>(ownerShared);
-        auto context = std::dynamic_pointer_cast<Context>(part);
-        if (!context) {
-            context = part->GetContext();
-        }
-        if (context) {
-            mContext = context;
-        }
         if (tickable && GetCount() == 1) {
             context = mContext.lock();
             if (context && !context->GetTickableComponents().Has(tickable)) {
@@ -62,6 +72,7 @@ void ComponentList::Removed(std::shared_ptr<Component> part, const bool forced) 
         if (part->GetParents().Has(ownerShared)) {
             part->GetParents().Remove(ownerShared, forced);
         }
+        part->SetContext(part->GetFirstInParents<Context>());
     } else if (mRole == ComponentListRole::Parents) {
         // Remove the owner from the parent's child list
         if (part->GetChildren().Has(ownerShared)) {
@@ -76,6 +87,7 @@ void ComponentList::Removed(std::shared_ptr<Component> part, const bool forced) 
                 context->GetTickableComponents().Remove(tickable);
             }
         }
+        ownerShared->SetContext(ownerShared->GetFirstInParents<Context>());
     }
 }
 

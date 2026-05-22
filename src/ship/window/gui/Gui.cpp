@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "ship/Context.h"
 #include "ship/config/Config.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/debug/Console.h"

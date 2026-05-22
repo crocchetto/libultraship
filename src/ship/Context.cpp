@@ -564,8 +564,7 @@ const TickableList& Context::GetTickableComponents() const {
 
 double Context::Tick() {
     const auto now = std::chrono::steady_clock::now();
-    const double durationSinceLastTick =
-        mHasTicked ? std::chrono::duration<double>(now - mLastTickTime).count() : 0.0;
+    const double durationSinceLastTick = mHasTicked ? std::chrono::duration<double>(now - mLastTickTime).count() : 0.0;
     mLastTickTime = now;
     mHasTicked = true;
 

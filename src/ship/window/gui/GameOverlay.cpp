@@ -6,6 +6,7 @@
 #include "ship/window/gui/resource/FontFactory.h"
 #include "ship/resource/archive/Archive.h"
 #include "ship/resource/ResourceManager.h"
+#include "ship/Context.h"
 #include "ship/window/Window.h"
 #include "ship/window/gui/Gui.h"
 #include "ship/utils/StringHelper.h"
