@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "ship/config/Config.h"
-#include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/debug/Console.h"
 #include "ship/resource/File.h"
@@ -25,6 +24,7 @@ namespace Ship {
 
 Gui::Gui(std::vector<std::shared_ptr<GuiWindow>> guiWindows) : Component("Gui"), mNeedsConsoleVariableSave(false) {
     mGameOverlay = std::make_shared<GameOverlay>();
+    GetChildren().Add(mGameOverlay);
 
     for (auto& guiWindow : guiWindows) {
         AddGuiWindow(guiWindow);
@@ -39,10 +39,14 @@ Gui::~Gui() {
 }
 
 void Gui::OnInit(const nlohmann::json& initArgs) {
-    mConsoleVariable = Ship::Context::GetInstance()->GetChildren().GetFirst<ConsoleVariable>();
-    mWindow = Ship::Context::GetInstance()->GetChildren().GetFirst<Window>();
-    mConfig = Ship::Context::GetInstance()->GetChildren().GetFirst<Config>();
-    mResourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<ResourceManager>();
+    auto context = GetContext();
+    if (!context) {
+        throw std::runtime_error("Gui requires Context dependency");
+    }
+    mConsoleVariable = RequireDependency(context->GetChildren().GetFirst<ConsoleVariable>(), "ConsoleVariable");
+    mWindow = RequireDependency(context->GetChildren().GetFirst<Window>(), "Window");
+    mConfig = RequireDependency(context->GetChildren().GetFirst<Config>(), "Config");
+    mResourceManager = RequireDependency(context->GetChildren().GetFirst<ResourceManager>(), "ResourceManager");
 
     // Add default windows now that deps are available
     if (GetGuiWindow("Stats") == nullptr) {
@@ -57,7 +61,7 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
     }
 
     if (GetGuiWindow("Console") == nullptr) {
-        auto console = Ship::Context::GetInstance()->GetChildren().GetFirst<Console>();
+        auto console = RequireDependency(context->GetChildren().GetFirst<Console>(), "Console");
         AddGuiWindow(std::make_shared<ConsoleWindow>(mConsoleVariable, mWindow, console, CVAR_CONSOLE_WINDOW_OPEN,
                                                      "Console", ImVec2(520, 600), ImGuiWindowFlags_NoFocusOnAppearing));
     }
@@ -87,8 +91,8 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
     mImGuiIo->FontGlobalScale = 2.0f;
 #endif
 
-    mImGuiIniPath = Context::GetPathRelativeToAppDirectory("imgui.ini");
-    mImGuiLogPath = Context::GetPathRelativeToAppDirectory("imgui_log.txt");
+    mImGuiIniPath = context->GetPathRelativeToAppDirectory("imgui.ini");
+    mImGuiLogPath = context->GetPathRelativeToAppDirectory("imgui_log.txt");
     mImGuiIo->IniFilename = mImGuiIniPath.c_str();
     mImGuiIo->LogFilename = mImGuiLogPath.c_str();
 
@@ -102,7 +106,7 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
         mImGuiIo->ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
     }
 
-    GetGameOverlay()->OnInit({});
+    GetGameOverlay()->Init({});
 
     mResourceManager->GetResourceLoader()->RegisterResourceFactory(
         std::make_shared<ResourceFactoryBinaryGuiTextureV0>(), RESOURCE_FORMAT_BINARY, "GuiTexture",
@@ -393,5 +397,21 @@ bool Gui::IsMouseOverActivePopup() {
 
 std::shared_ptr<GuiWindow> Gui::GetMenu() {
     return mMenu;
+}
+
+std::shared_ptr<ConsoleVariable> Gui::GetConsoleVariables() const {
+    return RequireDependency(mConsoleVariable, "ConsoleVariable");
+}
+
+std::shared_ptr<Window> Gui::GetWindowComponent() const {
+    return RequireDependency(mWindow, "Window");
+}
+
+std::shared_ptr<Config> Gui::GetConfigComponent() const {
+    return RequireDependency(mConfig, "Config");
+}
+
+std::shared_ptr<ResourceManager> Gui::GetResourceManager() const {
+    return RequireDependency(mResourceManager, "ResourceManager");
 }
 } // namespace Ship

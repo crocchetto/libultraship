@@ -1,6 +1,5 @@
 #include "ship/controller/physicaldevice/SDLAddRemoveDeviceEventHandler.h"
 #include <SDL2/SDL.h>
-#include "ship/Context.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 
 namespace Ship {
@@ -18,7 +17,11 @@ SDLAddRemoveDeviceEventHandler::~SDLAddRemoveDeviceEventHandler() {
 
 void SDLAddRemoveDeviceEventHandler::OnInit(const nlohmann::json& initArgs) {
     GuiWindow::OnInit(initArgs);
-    mControlDeck = Context::GetInstance()->GetChildren().GetFirst<ControlDeck>();
+    auto context = GetContext();
+    if (!context) {
+        throw std::runtime_error("SDLAddRemoveDeviceEventHandler requires Context dependency");
+    }
+    mControlDeck = RequireDependency(context->GetChildren().GetFirst<ControlDeck>(), "ControlDeck");
 }
 
 void SDLAddRemoveDeviceEventHandler::DrawElement() {

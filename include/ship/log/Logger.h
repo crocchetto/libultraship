@@ -21,11 +21,12 @@ namespace Ship {
 class Logger : public Component {
   public:
     /**
-     * @brief Constructs a Logger wrapping the given logger.
-     * @param logger The spdlog logger instance to wrap.
+     * @brief Constructs a Logger component.
      */
-    explicit Logger(std::shared_ptr<spdlog::logger> logger);
-    ~Logger() override = default;
+    Logger();
+    ~Logger() override;
+
+    void OnInit(const nlohmann::json& initArgs) override;
 
     /**
      * @brief Returns the underlying spdlog logger.
@@ -35,6 +36,7 @@ class Logger : public Component {
 
   private:
     std::shared_ptr<spdlog::logger> mLogger;
+    bool mOwnsLogger = false;
 };
 
 } // namespace Ship

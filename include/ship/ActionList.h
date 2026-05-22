@@ -38,11 +38,23 @@ class ActionList : public PartList<Action> {
     std::shared_ptr<std::vector<std::shared_ptr<Action>>> Get(EventID eventId) const;
 
     /**
+     * @brief Returns the first Action with the given EventID.
+     * @param eventId The EventID to filter by.
+     * @return The first matching Action, or nullptr.
+     */
+    std::shared_ptr<Action> GetFirst(EventID eventId) const;
+
+    /**
      * @brief Returns all Actions matching any of the given EventIDs.
      * @param eventIds A vector of EventIDs to filter by.
      * @return A vector of matching Actions.
      */
     std::shared_ptr<std::vector<std::shared_ptr<Action>>> Get(const std::vector<EventID>& eventIds) const;
+
+    template <typename T> bool Has(EventID eventId) const;
+    template <typename T> std::shared_ptr<std::vector<std::shared_ptr<T>>> Get(EventID eventId) const;
+    template <typename T> std::shared_ptr<std::vector<std::shared_ptr<T>>> Get(const std::vector<EventID>& eventIds) const;
+    template <typename T> std::shared_ptr<T> GetFirst(EventID eventId) const;
 
   protected:
     /**
@@ -73,6 +85,15 @@ inline std::shared_ptr<std::vector<std::shared_ptr<Action>>> ActionList::Get(Eve
         if (action->GetEventId() == eventId) {
             result->push_back(action);
         }
+
+        inline std::shared_ptr<Action> ActionList::GetFirst(EventID eventId) const {
+            for (const auto& action : this->GetList()) {
+                if (action->GetEventId() == eventId) {
+                    return action;
+                }
+            }
+            return nullptr;
+        }
     }
     return result;
 }
@@ -91,6 +112,11 @@ ActionList::Get(const std::vector<EventID>& eventIds) const {
 inline void ActionList::Added(std::shared_ptr<Action> action, const bool forced) {
     if (action) {
         action->Start();
+        auto& list = GetList();
+        std::stable_sort(list.begin(), list.end(),
+                         [](const std::shared_ptr<Action>& a, const std::shared_ptr<Action>& b) {
+                             return a->GetEventId() < b->GetEventId();
+                         });
     }
 }
 
@@ -98,6 +124,46 @@ inline void ActionList::Removed(std::shared_ptr<Action> action, const bool force
     if (action) {
         action->Stop();
     }
+}
+
+template <typename T> inline bool ActionList::Has(EventID eventId) const {
+    const auto& list = this->GetList();
+    return std::find_if(list.begin(), list.end(), [eventId](const std::shared_ptr<Action>& action) {
+               return action->GetEventId() == eventId && std::dynamic_pointer_cast<T>(action) != nullptr;
+           }) != list.end();
+}
+
+template <typename T> inline std::shared_ptr<std::vector<std::shared_ptr<T>>> ActionList::Get(EventID eventId) const {
+    auto result = std::make_shared<std::vector<std::shared_ptr<T>>>();
+    for (const auto& action : this->GetList()) {
+        auto typed = std::dynamic_pointer_cast<T>(action);
+        if (typed && action->GetEventId() == eventId) {
+            result->push_back(typed);
+        }
+    }
+    return result;
+}
+
+template <typename T>
+inline std::shared_ptr<std::vector<std::shared_ptr<T>>> ActionList::Get(const std::vector<EventID>& eventIds) const {
+    auto result = std::make_shared<std::vector<std::shared_ptr<T>>>();
+    for (const auto& action : this->GetList()) {
+        auto typed = std::dynamic_pointer_cast<T>(action);
+        if (typed && std::find(eventIds.begin(), eventIds.end(), action->GetEventId()) != eventIds.end()) {
+            result->push_back(typed);
+        }
+    }
+    return result;
+}
+
+template <typename T> inline std::shared_ptr<T> ActionList::GetFirst(EventID eventId) const {
+    for (const auto& action : this->GetList()) {
+        auto typed = std::dynamic_pointer_cast<T>(action);
+        if (typed && action->GetEventId() == eventId) {
+            return typed;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace Ship

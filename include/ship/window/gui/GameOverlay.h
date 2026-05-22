@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "ship/debug/Console.h"
+#include "ship/Component.h"
 #include <imgui.h>
 #include <unordered_map>
 #include "ship/resource/ResourceManager.h"
@@ -41,13 +42,13 @@ struct Overlay {
  * drawn at an arbitrary screen position with TextDraw(), or posted as a timed
  * notification with TextDrawNotification().
  */
-class GameOverlay {
+class GameOverlay : public Component {
   public:
     GameOverlay();
     virtual ~GameOverlay();
 
     /** @brief Initialises the overlay and loads the default font. */
-    void OnInit(const nlohmann::json& initArgs = {});
+    void OnInit(const nlohmann::json& initArgs = {}) override;
 
     /**
      * @brief Loads a font from an archive resource and registers it under @p name.

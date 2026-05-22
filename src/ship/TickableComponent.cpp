@@ -9,8 +9,9 @@ namespace Ship {
 TickableComponent::TickableComponent(const std::string& name, std::shared_ptr<Context> context,
                                      const TickGroup tickGroup, const TickPriority tickPriority,
                                      const std::vector<EventID>& eventIds)
-    : Tickable(false), Component(name), mTickGroup(tickGroup), mTickPriority(tickPriority), mContext(context),
+    : Tickable(false), Component(name), mTickGroup(tickGroup), mTickPriority(tickPriority),
       mPendingEventIds(eventIds) {
+    SetContext(context);
     // Note: Actions and context registration are deferred to RegisterWithContext()
     // because shared_from_this() cannot be called in a constructor.
 }
@@ -18,7 +19,8 @@ TickableComponent::TickableComponent(const std::string& name, std::shared_ptr<Co
 TickableComponent::TickableComponent(const std::string& name, std::shared_ptr<Context> context,
                                      const TickGroup tickGroup, const TickPriority tickPriority,
                                      const std::vector<std::shared_ptr<Action>>& actions)
-    : Tickable(true, actions), Component(name), mTickGroup(tickGroup), mTickPriority(tickPriority), mContext(context) {
+    : Tickable(true, actions), Component(name), mTickGroup(tickGroup), mTickPriority(tickPriority) {
+    SetContext(context);
 }
 
 TickableComponent::~TickableComponent() {
@@ -58,7 +60,7 @@ void TickableComponent::UnregisterFromContext() {
 }
 
 std::shared_ptr<Context> TickableComponent::GetContext() const {
-    return mContext;
+    return Component::GetContext();
 }
 
 TickGroup TickableComponent::GetTickGroup() const {
@@ -89,7 +91,7 @@ TickableComponent& TickableComponent::SetContext(std::shared_ptr<Context> contex
     if (oldContext != nullptr && self) {
         oldContext->GetTickableComponents().Remove(self);
     }
-    mContext = context;
+    Component::SetContext(context);
     if (context != nullptr && self) {
         context->GetTickableComponents().Add(self);
     }

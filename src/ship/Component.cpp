@@ -1,6 +1,6 @@
 #include "ship/Component.h"
+#include "ship/Context.h"
 
-#include <spdlog/spdlog.h>
 #include <algorithm>
 
 namespace Ship {
@@ -9,15 +9,9 @@ namespace Ship {
 
 Component::Component(const std::string& name)
     : Part(), mName(name), mParents(this, ComponentListRole::Parents), mChildren(this, ComponentListRole::Children) {
-    if (spdlog::default_logger()) {
-        SPDLOG_INFO("Constructing component {}", ToString());
-    }
 }
 
 Component::~Component() {
-    if (spdlog::default_logger()) {
-        SPDLOG_INFO("Destructing component {}", ToString());
-    }
 }
 
 const std::string& Component::GetName() const {
@@ -30,6 +24,10 @@ std::string Component::ToString() const {
 
 Component::operator std::string() const {
     return ToString();
+}
+
+double Component::Tick() {
+    return 0.0;
 }
 
 // ---- Get ----
@@ -73,6 +71,22 @@ void Component::OnInit(const nlohmann::json& /*initArgs*/) {
 
 void Component::MarkInitialized() {
     mIsInitialized = true;
+}
+
+std::shared_ptr<Context> Component::GetContext() const {
+    return mContext.lock();
+}
+
+void Component::SetContext(std::shared_ptr<Context> context) {
+    mContext = context;
+}
+
+void Component::OnAdded(bool /*forced*/) {
+    SetContext(GetFirstInParents<Context>());
+}
+
+void Component::OnRemoved(bool /*forced*/) {
+    SetContext(GetFirstInParents<Context>());
 }
 
 } // namespace Ship

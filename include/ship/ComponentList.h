@@ -11,6 +11,7 @@
 namespace Ship {
 
 class Component;
+class Context;
 
 /**
  * @brief Describes the role of a ComponentList within a parent/child relationship.
@@ -107,6 +108,7 @@ class ComponentList : public PartList<Component> {
   private:
     Component* mOwner = nullptr;
     ComponentListRole mRole = ComponentListRole::None;
+    std::weak_ptr<Context> mContext;
 };
 
 } // namespace Ship

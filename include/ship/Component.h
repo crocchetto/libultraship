@@ -15,6 +15,7 @@
 #include "ship/ComponentList.h"
 
 namespace Ship {
+class Context;
 
 /**
  * @brief A named Part with a parent/child hierarchy and optional thread safety.
@@ -72,6 +73,12 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
 
     /** @brief Conversion operator to std::string; equivalent to ToString(). */
     explicit operator std::string() const;
+
+    /**
+     * @brief Executes this component's per-frame tick.
+     * @return Elapsed time used for this tick, in seconds.
+     */
+    virtual double Tick();
 
     // ---- Parent/child relationship accessors ----
 
@@ -180,11 +187,25 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
     template <typename T>
     std::shared_ptr<T> RequireDependency(const std::shared_ptr<T>& dependency, const std::string& dependencyName) const;
 
+    /**
+     * @brief Returns the Context associated with this component (if any).
+     */
+    std::shared_ptr<Context> GetContext() const;
+
+    /**
+     * @brief Sets or clears the Context reference associated with this component.
+     */
+    void SetContext(std::shared_ptr<Context> context);
+
+    void OnAdded(bool forced) override;
+    void OnRemoved(bool forced) override;
+
   private:
     std::string mName;
     bool mIsInitialized = false;
     ComponentList mParents;
     ComponentList mChildren;
+    std::weak_ptr<Context> mContext;
 };
 
 // ---- Template BFS implementations (children) ----

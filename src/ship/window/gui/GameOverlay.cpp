@@ -6,13 +6,12 @@
 #include "ship/window/gui/resource/FontFactory.h"
 #include "ship/resource/archive/Archive.h"
 #include "ship/resource/ResourceManager.h"
-#include "ship/Context.h"
 #include "ship/window/Window.h"
 #include "ship/window/gui/Gui.h"
 #include "ship/utils/StringHelper.h"
 
 namespace Ship {
-GameOverlay::GameOverlay() {
+GameOverlay::GameOverlay() : Component("GameOverlay") {
 }
 
 GameOverlay::~GameOverlay() {
@@ -157,9 +156,13 @@ ImVec2 GameOverlay::CalculateTextSize(const char* text, const char* textEnd, boo
 }
 
 void GameOverlay::OnInit(const nlohmann::json& /*initArgs*/) {
-    mResourceManager = Context::GetInstance()->GetChildren().GetFirst<ResourceManager>();
-    mConsoleVariables = Context::GetInstance()->GetChildren().GetFirst<ConsoleVariable>();
-    mWindow = Context::GetInstance()->GetChildren().GetFirst<Window>();
+    auto context = GetContext();
+    if (!context) {
+        throw std::runtime_error("GameOverlay requires Context dependency");
+    }
+    mResourceManager = RequireDependency(context->GetChildren().GetFirst<ResourceManager>(), "ResourceManager");
+    mConsoleVariables = RequireDependency(context->GetChildren().GetFirst<ConsoleVariable>(), "ConsoleVariable");
+    mWindow = RequireDependency(context->GetChildren().GetFirst<Window>(), "Window");
 
     mResourceManager->GetResourceLoader()->RegisterResourceFactory(std::make_shared<ResourceFactoryBinaryFontV0>(),
                                                                    RESOURCE_FORMAT_BINARY, "Font",

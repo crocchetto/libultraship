@@ -224,6 +224,11 @@ class Gui : public Component {
     /** @brief Updates mouse capture state based on window focus and UI interaction. */
     void HandleMouseCapture();
 
+    std::shared_ptr<ConsoleVariable> GetConsoleVariables() const;
+    std::shared_ptr<Window> GetWindowComponent() const;
+    std::shared_ptr<Config> GetConfigComponent() const;
+    std::shared_ptr<ResourceManager> GetResourceManager() const;
+
     ImVec2 mTemporaryWindowPos; ///< Scratchpad position used when repositioning windows.
     ImGuiIO* mImGuiIo;          ///< Pointer to the active ImGuiIO context.
     std::map<std::string, std::shared_ptr<GuiWindow>> mGuiWindows; ///< Registered window map (name → window).

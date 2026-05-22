@@ -146,7 +146,6 @@ class TickableComponent : public Tickable, public Component {
   private:
     TickGroup mTickGroup;
     TickPriority mTickPriority;
-    std::shared_ptr<Context> mContext;
     std::vector<EventID> mPendingEventIds;
     std::weak_ptr<TickableComponent> mWeakSelf;
 };

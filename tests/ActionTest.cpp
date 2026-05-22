@@ -170,3 +170,39 @@ TEST(ActionListTest, HasByEventId) {
     EXPECT_TRUE(list.Has(kTickEvent));
     EXPECT_FALSE(list.Has(kDrawEvent));
 }
+
+TEST(ActionListTest, GetFirstByEventId) {
+    ActionList list;
+    auto tickable = std::make_shared<TestTickable>();
+    auto first = std::make_shared<TestAction>(kTickEvent, tickable);
+    auto second = std::make_shared<TestAction>(kTickEvent, tickable);
+    list.Add(first);
+    list.Add(second);
+
+    EXPECT_EQ(list.GetFirst(kTickEvent), first);
+    EXPECT_EQ(list.GetFirst(kDrawEvent), nullptr);
+}
+
+TEST(ActionListTest, HasGetByEventIdAndType) {
+    ActionList list;
+    auto tickable = std::make_shared<TestTickable>();
+    list.Add(std::make_shared<TestAction>(kTickEvent, tickable));
+    auto derivedTick = std::make_shared<DerivedTestAction>(kTickEvent, tickable);
+    auto derivedDraw = std::make_shared<DerivedTestAction>(kDrawEvent, tickable);
+    list.Add(derivedTick);
+    list.Add(derivedDraw);
+
+    EXPECT_TRUE(list.Has<DerivedTestAction>(kTickEvent));
+    EXPECT_FALSE(list.Has<DerivedTestAction>(kDrawDebugMenuEvent));
+
+    auto tickDerived = list.Get<DerivedTestAction>(kTickEvent);
+    ASSERT_EQ(tickDerived->size(), 1u);
+    EXPECT_EQ((*tickDerived)[0], derivedTick);
+
+    auto subset = list.Get<DerivedTestAction>(std::vector<EventID>{ kTickEvent, kDrawDebugMenuEvent });
+    ASSERT_EQ(subset->size(), 1u);
+    EXPECT_EQ((*subset)[0], derivedTick);
+
+    EXPECT_EQ(list.GetFirst<DerivedTestAction>(kTickEvent), derivedTick);
+    EXPECT_EQ(list.GetFirst<DerivedTestAction>(kDrawDebugMenuEvent), nullptr);
+}

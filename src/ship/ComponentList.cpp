@@ -6,7 +6,7 @@
 namespace Ship {
 
 ComponentList::ComponentList(Component* owner, ComponentListRole role)
-    : PartList<Component>(), mOwner(owner), mRole(role) {
+    : PartList<Component>(), mOwner(owner), mRole(role), mContext(owner ? owner->GetContext() : nullptr) {
 }
 
 void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
@@ -34,8 +34,15 @@ void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
 
         // Register TickableComponent with the Context's global TickableList when it gets its first parent
         auto tickable = std::dynamic_pointer_cast<TickableComponent>(ownerShared);
+        auto context = std::dynamic_pointer_cast<Context>(part);
+        if (!context) {
+            context = part->GetContext();
+        }
+        if (context) {
+            mContext = context;
+        }
         if (tickable && GetCount() == 1) {
-            auto context = Context::GetInstance();
+            context = mContext.lock();
             if (context && !context->GetTickableComponents().Has(tickable)) {
                 context->GetTickableComponents().Add(tickable);
             }
@@ -64,7 +71,7 @@ void ComponentList::Removed(std::shared_ptr<Component> part, const bool forced) 
         // Unregister TickableComponent from the Context's global TickableList when it loses its last parent
         auto tickable = std::dynamic_pointer_cast<TickableComponent>(ownerShared);
         if (tickable && GetCount() == 0) {
-            auto context = Context::GetInstance();
+            auto context = mContext.lock();
             if (context && context->GetTickableComponents().Has(tickable)) {
                 context->GetTickableComponents().Remove(tickable);
             }

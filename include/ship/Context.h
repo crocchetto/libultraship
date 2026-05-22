@@ -7,7 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
-#include <spdlog/async.h>
+#include <chrono>
 #include "ship/audio/Audio.h"
 #include "ship/Component.h"
 #include "ship/TickableList.h"
@@ -192,6 +192,7 @@ class Context : public Component {
     // ---- TickableComponent list ----
     TickableList& GetTickableComponents();
     const TickableList& GetTickableComponents() const;
+    double Tick() override;
 
   protected:
     Context() = default;
@@ -199,10 +200,11 @@ class Context : public Component {
   private:
     static std::weak_ptr<Context> mContext;
 
-    bool mOwnsLogger = false;
     std::string mShortName;
 
     TickableList mTickableComponents;
+    std::chrono::steady_clock::time_point mLastTickTime;
+    bool mHasTicked = false;
 #ifdef COMPONENT_THREAD_SAFE
     mutable std::mutex mTickableMutex;
 #endif

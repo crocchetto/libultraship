@@ -75,6 +75,7 @@ Fast3dWindow::~Fast3dWindow() {
 
 void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
     Window::OnInit(initArgs);
+    auto context = RequireDependency(GetContext(), "Context");
     bool gameMode = false;
 
 #ifdef __linux__
@@ -116,8 +117,8 @@ void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
     InitWindowManager();
     mGfxDebugger = std::make_shared<GfxDebugger>();
     mInterpreter->SetGfxDebugger(mGfxDebugger);
-    mInterpreter->Init(mWindowManagerApi, mRenderingApi, Ship::Context::GetInstance()->GetName().c_str(), isFullscreen,
-                       width, height, posX, posY);
+    mInterpreter->Init(mWindowManagerApi, mRenderingApi, context->GetName().c_str(), isFullscreen, width, height, posX,
+                       posY);
     mWindowManagerApi->SetFullscreenChangedCallback(OnFullscreenChanged);
     mWindowManagerApi->SetKeyboardCallbacks(KeyDown, KeyUp, AllKeysUp);
     mWindowManagerApi->SetMouseCallbacks(MouseButtonDown, MouseButtonUp);
@@ -127,7 +128,8 @@ void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
     // Register the GFX Debugger window if not already present.
     if (GetGui() && GetGui()->GetGuiWindow("Gfx Debugger") == nullptr) {
         auto gfxDebugger = mGfxDebugger;
-        auto resourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ResourceManager>();
+        auto resourceManager =
+            RequireDependency(context->GetChildren().GetFirst<Ship::ResourceManager>(), "ResourceManager");
         auto self = std::dynamic_pointer_cast<Fast3dWindow>(GetSharedComponent());
         GetGui()->AddGuiWindow(std::make_shared<LUS::GfxDebuggerWindow>(CVAR_GFX_DEBUGGER_WINDOW_OPEN, "Gfx Debugger",
                                                                         self, gfxDebugger, resourceManager));

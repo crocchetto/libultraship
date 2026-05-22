@@ -236,6 +236,40 @@ TEST_F(TickableComponentTest, ConstructorWithActionsListRegistersWithContext) {
     tc->UnregisterFromContext();
 }
 
+class OrderedTickable : public TickableComponent {
+  public:
+    OrderedTickable(std::shared_ptr<Context> ctx, int marker, TickPriority priority)
+        : TickableComponent("OrderedTickable", ctx, TickGroup::TickGroupDefault, priority, std::vector<EventID>{ 1 }),
+          mMarker(marker) {
+    }
+
+    std::vector<int>* mOrder = nullptr;
+    int mMarker = 0;
+
+    bool ActionRan(EventID eventId, const double durationSinceLastTick) override {
+        if (mOrder != nullptr) {
+            mOrder->push_back(mMarker);
+        }
+        return true;
+    }
+};
+
+TEST_F(TickableComponentTest, ContextTickRunsTickablesInOrder) {
+    std::vector<int> order;
+    auto slow = std::make_shared<OrderedTickable>(mContext, 2, static_cast<TickPriority>(10u));
+    auto fast = std::make_shared<OrderedTickable>(mContext, 1, static_cast<TickPriority>(1u));
+    slow->mOrder = &order;
+    fast->mOrder = &order;
+    slow->RegisterWithContext(slow);
+    fast->RegisterWithContext(fast);
+
+    mContext->Tick();
+
+    ASSERT_EQ(order.size(), 2u);
+    EXPECT_EQ(order[0], 1);
+    EXPECT_EQ(order[1], 2);
+}
+
 // ---- Test 16: Auto-registration via ComponentList when first parent added ----
 
 TEST_F(TickableComponentTest, AutoRegistrationWhenFirstParentAdded) {

@@ -1,7 +1,6 @@
 #include "fast/Fast3dGui.h"
 
 #include "fast/Fast3dWindow.h"
-#include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/window/Window.h"
 #include "ship/config/Config.h"
@@ -50,10 +49,10 @@ Fast3dGui::Fast3dGui(std::vector<std::shared_ptr<Ship::GuiWindow>> guiWindows) :
 
 void Fast3dGui::Init(GuiWindowInitData windowImpl) {
     mImpl = windowImpl;
-    mWindow = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>();
-    mConsoleVariables = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    mResourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ResourceManager>();
     Gui::OnInit({});
+    mWindow = GetWindowComponent();
+    mConsoleVariables = GetConsoleVariables();
+    mResourceManager = GetResourceManager();
 }
 
 bool Fast3dGui::SupportsViewports() {
