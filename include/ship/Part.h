@@ -1,9 +1,12 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <stdint.h>
 
 namespace Ship {
+
+class Context;
 
 /** @brief Sentinel value representing an invalid or unassigned Part ID. */
 #define INVALID_PART_ID UINT64_MAX
@@ -13,6 +16,10 @@ namespace Ship {
  *
  * Every Part is automatically assigned a unique, monotonically increasing ID
  * at construction time. IDs are never reused during the lifetime of the process.
+ *
+ * Every Part also stores a weak reference to the Context it belongs to. This
+ * reference is set when the Part is added to the component hierarchy and
+ * propagated to child components by ComponentList.
  */
 class Part {
   public:
@@ -29,6 +36,26 @@ class Part {
      * @return True if both Parts share the same ID.
      */
     bool operator==(const Part& other) const;
+
+    /**
+     * @brief Returns the Context this Part belongs to, or nullptr if unset.
+     *
+     * The context is propagated automatically by ComponentList when this Part
+     * is added to a hierarchy. Components should cache their dependencies from
+     * this Context (or from constructor parameters) rather than using the
+     * Context singleton.
+     */
+    std::shared_ptr<Context> GetContext() const;
+
+    /**
+     * @brief Sets the Context this Part belongs to.
+     *
+     * Called by ComponentList when a Part is added to the hierarchy. Not
+     * normally called directly by application code.
+     *
+     * @param ctx The Context to associate with this Part.
+     */
+    void SetContext(std::shared_ptr<Context> ctx);
 
   protected:
     /**
@@ -56,6 +83,7 @@ class Part {
   private:
     static std::atomic<uint64_t> sNextPartId;
     uint64_t mId;
+    std::weak_ptr<Context> mContext;
 };
 
 } // namespace Ship

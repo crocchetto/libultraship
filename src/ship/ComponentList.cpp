@@ -5,6 +5,15 @@
 
 namespace Ship {
 
+// Helper: recursively set the context on a component and all of its descendants.
+static void PropagateContextDown(Component* comp, std::shared_ptr<Context> ctx) {
+    comp->SetContext(ctx);
+    auto children = comp->GetChildren().Get();
+    for (const auto& child : *children) {
+        PropagateContextDown(child.get(), ctx);
+    }
+}
+
 ComponentList::ComponentList(Component* owner, ComponentListRole role)
     : PartList<Component>(), mOwner(owner), mRole(role) {
 }
@@ -26,6 +35,11 @@ void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
         if (!part->GetParents().Has(ownerShared)) {
             part->GetParents().Add(ownerShared, forced);
         }
+        // Propagate the owner's Context (if any) down to the new child and all
+        // of its existing descendants.
+        if (auto ctx = mOwner->GetContext()) {
+            PropagateContextDown(part.get(), ctx);
+        }
     } else if (mRole == ComponentListRole::Parents) {
         // Add the owner as a child of the parent (if not already present)
         if (!part->GetChildren().Has(ownerShared)) {
@@ -35,7 +49,9 @@ void ComponentList::Added(std::shared_ptr<Component> part, const bool forced) {
         // Register TickableComponent with the Context's global TickableList when it gets its first parent
         auto tickable = std::dynamic_pointer_cast<TickableComponent>(ownerShared);
         if (tickable && GetCount() == 1) {
-            auto context = Context::GetInstance();
+            // Use the TickableComponent's own stored context (set at construction time) rather
+            // than the owner's Part context, which may not yet be propagated.
+            auto context = tickable->GetContext();
             if (context && !context->GetTickableComponents().Has(tickable)) {
                 context->GetTickableComponents().Add(tickable);
             }
@@ -64,7 +80,8 @@ void ComponentList::Removed(std::shared_ptr<Component> part, const bool forced) 
         // Unregister TickableComponent from the Context's global TickableList when it loses its last parent
         auto tickable = std::dynamic_pointer_cast<TickableComponent>(ownerShared);
         if (tickable && GetCount() == 0) {
-            auto context = Context::GetInstance();
+            // Use the TickableComponent's own stored context (set at construction time).
+            auto context = tickable->GetContext();
             if (context && context->GetTickableComponents().Has(tickable)) {
                 context->GetTickableComponents().Remove(tickable);
             }

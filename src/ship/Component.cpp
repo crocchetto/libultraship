@@ -1,4 +1,5 @@
 #include "ship/Component.h"
+#include "ship/Context.h"
 
 #include <spdlog/spdlog.h>
 #include <algorithm>
@@ -52,6 +53,24 @@ const ComponentList& Component::GetChildren() const {
 
 std::shared_ptr<Component> Component::GetSharedComponent() {
     return shared_from_this();
+}
+
+void Component::Tick() {
+    auto context = GetContext();
+    if (!context) {
+        return;
+    }
+
+    const auto now = std::chrono::steady_clock::now();
+    double durationSinceLastTick = 0.0;
+    if (mLastTickTime != std::chrono::steady_clock::time_point{}) {
+        durationSinceLastTick = std::chrono::duration<double>(now - mLastTickTime).count();
+    }
+    mLastTickTime = now;
+
+    for (const auto& tc : *context->GetTickableComponents().Get()) {
+        tc->Run(durationSinceLastTick);
+    }
 }
 
 void Component::Init(const nlohmann::json& initArgs) {

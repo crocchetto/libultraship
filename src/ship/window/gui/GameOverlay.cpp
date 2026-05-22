@@ -12,7 +12,7 @@
 #include "ship/utils/StringHelper.h"
 
 namespace Ship {
-GameOverlay::GameOverlay() {
+GameOverlay::GameOverlay() : Component("GameOverlay") {
 }
 
 GameOverlay::~GameOverlay() {
@@ -157,9 +157,10 @@ ImVec2 GameOverlay::CalculateTextSize(const char* text, const char* textEnd, boo
 }
 
 void GameOverlay::OnInit(const nlohmann::json& /*initArgs*/) {
-    mResourceManager = Context::GetInstance()->GetChildren().GetFirst<ResourceManager>();
-    mConsoleVariables = Context::GetInstance()->GetChildren().GetFirst<ConsoleVariable>();
-    mWindow = Context::GetInstance()->GetChildren().GetFirst<Window>();
+    auto context = RequireDependency(GetContext(), "Context");
+    mResourceManager = RequireDependency(context->GetChildren().GetFirst<ResourceManager>(), "ResourceManager");
+    mConsoleVariables = RequireDependency(context->GetChildren().GetFirst<ConsoleVariable>(), "ConsoleVariable");
+    mWindow = RequireDependency(context->GetChildren().GetFirst<Window>(), "Window");
 
     mResourceManager->GetResourceLoader()->RegisterResourceFactory(std::make_shared<ResourceFactoryBinaryFontV0>(),
                                                                    RESOURCE_FORMAT_BINARY, "Font",

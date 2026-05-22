@@ -22,6 +22,7 @@ class ActionList : public PartList<Action> {
     using PartList<Action>::PartList;
     using PartList<Action>::Has;
     using PartList<Action>::Get;
+    using PartList<Action>::GetFirst;
 
     /**
      * @brief Checks whether any Action with the given EventID is in the list.
@@ -92,6 +93,11 @@ inline void ActionList::Added(std::shared_ptr<Action> action, const bool forced)
     if (action) {
         action->Start();
     }
+    // Keep the list sorted by EventID so Run() never needs to sort.
+    auto& list = GetList();
+    std::stable_sort(list.begin(), list.end(), [](const std::shared_ptr<Action>& a, const std::shared_ptr<Action>& b) {
+        return a->GetEventId() < b->GetEventId();
+    });
 }
 
 inline void ActionList::Removed(std::shared_ptr<Action> action, const bool forced) {

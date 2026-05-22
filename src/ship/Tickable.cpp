@@ -104,10 +104,6 @@ double Tickable::Run(const double durationSinceLastTick) {
     }
 
     auto actions = mActions.Get();
-    std::stable_sort(actions->begin(), actions->end(),
-                     [](const std::shared_ptr<Action>& a, const std::shared_ptr<Action>& b) {
-                         return a->GetEventId() < b->GetEventId();
-                     });
     for (const auto& action : *actions) {
         action->Run(durationSinceLastTick);
     }
@@ -128,10 +124,6 @@ double Tickable::Run(const double durationSinceLastTick, const std::vector<Event
     const auto start = std::chrono::steady_clock::now();
 #endif
     auto actions = mActions.Get(eventIds);
-    std::stable_sort(actions->begin(), actions->end(),
-                     [](const std::shared_ptr<Action>& a, const std::shared_ptr<Action>& b) {
-                         return a->GetEventId() < b->GetEventId();
-                     });
     for (const auto& action : *actions) {
         action->Run(durationSinceLastTick);
     }

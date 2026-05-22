@@ -39,10 +39,11 @@ Gui::~Gui() {
 }
 
 void Gui::OnInit(const nlohmann::json& initArgs) {
-    mConsoleVariable = Ship::Context::GetInstance()->GetChildren().GetFirst<ConsoleVariable>();
-    mWindow = Ship::Context::GetInstance()->GetChildren().GetFirst<Window>();
-    mConfig = Ship::Context::GetInstance()->GetChildren().GetFirst<Config>();
-    mResourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<ResourceManager>();
+    auto context = RequireDependency(GetContext(), "Context");
+    mConsoleVariable = RequireDependency(context->GetChildren().GetFirst<ConsoleVariable>(), "ConsoleVariable");
+    mWindow = RequireDependency(context->GetChildren().GetFirst<Window>(), "Window");
+    mConfig = RequireDependency(context->GetChildren().GetFirst<Config>(), "Config");
+    mResourceManager = RequireDependency(context->GetChildren().GetFirst<ResourceManager>(), "ResourceManager");
 
     // Add default windows now that deps are available
     if (GetGuiWindow("Stats") == nullptr) {
@@ -57,7 +58,7 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
     }
 
     if (GetGuiWindow("Console") == nullptr) {
-        auto console = Ship::Context::GetInstance()->GetChildren().GetFirst<Console>();
+        auto console = RequireDependency(context->GetChildren().GetFirst<Console>(), "Console");
         AddGuiWindow(std::make_shared<ConsoleWindow>(mConsoleVariable, mWindow, console, CVAR_CONSOLE_WINDOW_OPEN,
                                                      "Console", ImVec2(520, 600), ImGuiWindowFlags_NoFocusOnAppearing));
     }
@@ -102,7 +103,10 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
         mImGuiIo->ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
     }
 
-    GetGameOverlay()->OnInit({});
+    // Add GameOverlay as a child component so it participates in the hierarchy
+    // and receives the correct Context. Then initialise it.
+    GetChildren().Add(mGameOverlay);
+    mGameOverlay->Init({});
 
     mResourceManager->GetResourceLoader()->RegisterResourceFactory(
         std::make_shared<ResourceFactoryBinaryGuiTextureV0>(), RESOURCE_FORMAT_BINARY, "GuiTexture",

@@ -7,7 +7,6 @@
 #include <vector>
 #include <unordered_map>
 #include <stdint.h>
-#include <spdlog/async.h>
 #include "ship/audio/Audio.h"
 #include "ship/Component.h"
 #include "ship/TickableList.h"
@@ -199,7 +198,6 @@ class Context : public Component {
   private:
     static std::weak_ptr<Context> mContext;
 
-    bool mOwnsLogger = false;
     std::string mShortName;
 
     TickableList mTickableComponents;

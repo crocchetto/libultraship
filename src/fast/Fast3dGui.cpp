@@ -50,9 +50,10 @@ Fast3dGui::Fast3dGui(std::vector<std::shared_ptr<Ship::GuiWindow>> guiWindows) :
 
 void Fast3dGui::Init(GuiWindowInitData windowImpl) {
     mImpl = windowImpl;
-    mWindow = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::Window>();
-    mConsoleVariables = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    mResourceManager = Ship::Context::GetInstance()->GetChildren().GetFirst<Ship::ResourceManager>();
+    auto context = RequireDependency(GetContext(), "Context");
+    mWindow = RequireDependency(context->GetChildren().GetFirst<Ship::Window>(), "Window");
+    mConsoleVariables = RequireDependency(context->GetChildren().GetFirst<Ship::ConsoleVariable>(), "ConsoleVariable");
+    mResourceManager = RequireDependency(context->GetChildren().GetFirst<Ship::ResourceManager>(), "ResourceManager");
     Gui::OnInit({});
 }
 

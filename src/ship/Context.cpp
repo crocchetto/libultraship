@@ -5,9 +5,6 @@
 #include <iostream>
 #include <algorithm>
 #include <queue>
-#include <spdlog/async.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include "ship/install_config.h"
 #include "ship/default_context_json.h" // Auto-generated from default_context.json by CMake
 #include "fast/debug/GfxDebugger.h"
@@ -69,9 +66,7 @@ Context::~Context() {
     if (config) {
         config->Save();
     }
-    if (mOwnsLogger) {
-        spdlog::shutdown();
-    }
+    // spdlog shutdown is now owned by the Logger component which was destroyed above.
 }
 
 std::shared_ptr<Context> Context::CreateDefaultInstance(const std::string& name, const std::string& shortName,
@@ -88,70 +83,17 @@ std::shared_ptr<Context> Context::CreateDefaultInstance(const std::string& name,
 
     auto shared = std::make_shared<Context>(name, shortName);
     mContext = shared;
+    // The Context is the root of the hierarchy; set itself as its own Context so that
+    // all children added later can find it via GetContext().
+    shared->SetContext(shared);
 
     // ---- Logging ----
     try {
-        spdlog::init_thread_pool(8192, 1);
-        std::vector<spdlog::sink_ptr> sinks;
-
-#if (!defined(_WIN32)) || defined(_DEBUG)
-#if defined(_DEBUG) && defined(_WIN32)
-        FreeConsole();
-        if (AllocConsole() == 0) {
-            throw std::system_error(GetLastError(), std::generic_category(), "Failed to create debug console");
-        }
-
-        SetConsoleOutputCP(CP_UTF8);
-
-        FILE* fDummy;
-        freopen_s(&fDummy, "CONOUT$", "w", stdout);
-        freopen_s(&fDummy, "CONOUT$", "w", stderr);
-        freopen_s(&fDummy, "CONIN$", "r", stdin);
-        std::cout.clear();
-        std::clog.clear();
-        std::cerr.clear();
-        std::cin.clear();
-
-        HANDLE hConOut = CreateFile(_T("CONOUT$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                    NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        HANDLE hConIn = CreateFile(_T("CONIN$"), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                                   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
-        SetStdHandle(STD_ERROR_HANDLE, hConOut);
-        SetStdHandle(STD_INPUT_HANDLE, hConIn);
-        std::wcout.clear();
-        std::wclog.clear();
-        std::wcerr.clear();
-        std::wcin.clear();
-#endif
-        auto systemConsoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        sinks.push_back(systemConsoleSink);
-#endif
-
-        auto logPath = GetPathRelativeToAppDirectory(("logs/" + name + ".log"));
-        auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logPath, 1024 * 1024 * 10, 10);
-        sinks.push_back(fileSink);
-
-        std::shared_ptr<spdlog::logger> logger;
-#ifdef _DEBUG
-        logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
-        logger->set_level(spdlog::level::debug);
-        logger->flush_on(spdlog::level::trace);
-#else
-        logger = std::make_shared<spdlog::async_logger>(name, sinks.begin(), sinks.end(), spdlog::thread_pool(),
-                                                        spdlog::async_overflow_policy::block);
-        logger->set_level(spdlog::level::warn);
-        logger->flush_on(spdlog::level::info);
-#endif
-
-        logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%@] [%l] %v");
-
-        spdlog::register_logger(logger);
-        spdlog::set_default_logger(logger);
-        shared->mOwnsLogger = true;
-
-        shared->GetChildren().Add(std::make_shared<Logger>(logger));
-    } catch (const spdlog::spdlog_ex& ex) {
+        auto logPath = GetPathRelativeToAppDirectory("logs/" + name + ".log");
+        auto logger = std::make_shared<Logger>(name, logPath);
+        shared->GetChildren().Add(logger);
+        logger->Init();
+    } catch (const std::exception& ex) {
         std::cout << "Log initialization failed: " << ex.what() << std::endl;
         return nullptr;
     }
@@ -456,6 +398,7 @@ std::shared_ptr<Context> Context::CreateInstance(const std::string& name, const 
 
     auto shared = std::make_shared<Context>(name, shortName);
     mContext = shared;
+    shared->SetContext(shared);
     return shared;
 }
 

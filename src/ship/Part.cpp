@@ -1,4 +1,5 @@
 #include "ship/Part.h"
+#include "ship/Context.h"
 
 namespace Ship {
 std::atomic<uint64_t> Part::sNextPartId = 0;
@@ -12,6 +13,14 @@ uint64_t Part::GetId() const {
 
 bool Part::operator==(const Part& other) const {
     return GetId() == other.GetId();
+}
+
+std::shared_ptr<Context> Part::GetContext() const {
+    return mContext.lock();
+}
+
+void Part::SetContext(std::shared_ptr<Context> ctx) {
+    mContext = ctx;
 }
 
 void Part::OnAdded(bool /*forced*/) {
