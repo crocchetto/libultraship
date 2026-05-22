@@ -23,7 +23,6 @@
 
 #include "ship/config/ConsoleVariable.h"
 #include "ship/config/Config.h"
-#include "ship/Context.h"
 #include "ship/window/FileDrop.h"
 
 #include "libultraship/bridge/controllerbridge.h"
@@ -58,6 +57,14 @@ using QWORD = uint64_t; // For NEXTRAWINPUTBLOCK
 #define ALLOW_BACKGROUND_INPUTS_BLOCK_ID 95237930
 
 namespace Fast {
+
+GfxWindowBackendDXGI::GfxWindowBackendDXGI(std::shared_ptr<Ship::Config> config,
+                                           std::shared_ptr<Ship::FileDrop> fileDrop,
+                                           std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
+                                           std::shared_ptr<Fast::Fast3dGui> fast3dGui)
+    : mFileDrop(std::move(fileDrop)), mConsoleVariable(std::move(consoleVariable)), mFast3dGui(std::move(fast3dGui)),
+      mConfig(std::move(config)) {
+}
 
 void GfxWindowBackendDXGI::LoadDxgi() {
     dxgi_module = LoadLibraryW(L"dxgi.dll");
@@ -614,14 +621,6 @@ void GfxWindowBackendDXGI::Init(const char* game_name, const char* gfx_api_name,
     mRawInputDevice[0].dwFlags = RIDEV_INPUTSINK;
     mRawInputDevice[0].hwndTarget = h_wnd;
     RegisterRawInputDevices(mRawInputDevice, 1, sizeof(mRawInputDevice[0]));
-
-    auto ctx = Ship::Context::GetCurrent();
-    mConfig = ctx->GetChildren().GetFirst<Ship::Config>();
-    mFileDrop = ctx->GetChildren().GetFirst<Ship::FileDrop>();
-    mConsoleVariable = ctx->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    if (auto window = ctx->GetChildren().GetFirst<Ship::Window>()) {
-        mFast3dGui = std::dynamic_pointer_cast<Fast::Fast3dGui>(window->GetGui());
-    }
 }
 
 void GfxWindowBackendDXGI::SetFullscreenChangedCallback(void (*mOnFullscreenChanged)(bool is_now_fullscreen)) {

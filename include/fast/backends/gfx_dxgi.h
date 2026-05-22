@@ -20,7 +20,10 @@ class Fast3dGui;
 
 class GfxWindowBackendDXGI final : public GfxWindowBackend {
   public:
-    GfxWindowBackendDXGI() = default;
+    GfxWindowBackendDXGI(std::shared_ptr<Ship::Config> config = nullptr,
+                         std::shared_ptr<Ship::FileDrop> fileDrop = nullptr,
+                         std::shared_ptr<Ship::ConsoleVariable> consoleVariable = nullptr,
+                         std::shared_ptr<Fast::Fast3dGui> fast3dGui = nullptr);
     ~GfxWindowBackendDXGI() override;
 
     void Init(const char* gameName, const char* apiName, bool startFullScreen, uint32_t width, uint32_t height,

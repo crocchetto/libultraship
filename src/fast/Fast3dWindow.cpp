@@ -4,6 +4,8 @@
 #include "ship/config/Config.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 #include "ship/config/ConsoleVariable.h"
+#include "ship/window/FileDrop.h"
+#include "ship/resource/ResourceManager.h"
 #include "fast/interpreter.h"
 #include "fast/backends/gfx_sdl.h"
 #include "fast/backends/gfx_dxgi.h"
@@ -21,6 +23,8 @@
 namespace Fast {
 
 extern void GfxSetInstance(std::shared_ptr<Interpreter> gfx);
+
+std::weak_ptr<Fast3dWindow> Fast3dWindow::sCurrentWindow;
 
 Fast3dWindow::Fast3dWindow(std::shared_ptr<Ship::Gui> gui, std::shared_ptr<FastMouseStateManager> mouseStateManager,
                            std::shared_ptr<Ship::Config> config,
@@ -68,6 +72,9 @@ Fast3dWindow::Fast3dWindow(std::shared_ptr<Ship::Config> config,
 
 Fast3dWindow::~Fast3dWindow() {
     SPDLOG_DEBUG("destruct fast3dwindow");
+    if (auto self = sCurrentWindow.lock(); self && self.get() == this) {
+        sCurrentWindow.reset();
+    }
     mInterpreter->Destroy();
     delete mRenderingApi;
     delete mWindowManagerApi;
@@ -75,6 +82,7 @@ Fast3dWindow::~Fast3dWindow() {
 
 void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
     Window::OnInit(initArgs);
+    sCurrentWindow = std::dynamic_pointer_cast<Fast3dWindow>(GetSharedComponent());
     bool gameMode = false;
 
 #ifdef __linux__
@@ -160,8 +168,12 @@ void Fast3dWindow::InitWindowManager() {
     switch (GetWindowBackend()) {
 #ifdef ENABLE_DX11
         case WindowBackend::FAST3D_DXGI_DX11:
-            mWindowManagerApi = new GfxWindowBackendDXGI();
-            mRenderingApi = new GfxRenderingAPIDX11(static_cast<GfxWindowBackendDXGI*>(mWindowManagerApi));
+            mWindowManagerApi =
+                new GfxWindowBackendDXGI(GetConfig(), GetContext()->GetChildren().GetFirst<Ship::FileDrop>(),
+                                         GetConsoleVariables(), std::dynamic_pointer_cast<Fast::Fast3dGui>(GetGui()));
+            mRenderingApi =
+                new GfxRenderingAPIDX11(static_cast<GfxWindowBackendDXGI*>(mWindowManagerApi), GetConsoleVariables(),
+                                        GetContext()->GetChildren().GetFirst<Ship::ResourceManager>());
             break;
 #endif
 #ifdef ENABLE_OPENGL
@@ -364,8 +376,7 @@ const char* Fast3dWindow::GetKeyName(int32_t scancode) {
 }
 
 bool Fast3dWindow::KeyUp(int32_t scancode) {
-    auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
+    auto wnd = sCurrentWindow.lock();
     if (!wnd) {
         return false;
     }
@@ -384,8 +395,7 @@ bool Fast3dWindow::KeyUp(int32_t scancode) {
 }
 
 bool Fast3dWindow::KeyDown(int32_t scancode) {
-    auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
+    auto wnd = sCurrentWindow.lock();
     if (!wnd) {
         return false;
     }
@@ -397,8 +407,7 @@ bool Fast3dWindow::KeyDown(int32_t scancode) {
 }
 
 void Fast3dWindow::AllKeysUp() {
-    auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
+    auto wnd = sCurrentWindow.lock();
     if (!wnd) {
         return;
     }
@@ -408,8 +417,7 @@ void Fast3dWindow::AllKeysUp() {
 }
 
 bool Fast3dWindow::MouseButtonUp(int button) {
-    auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
+    auto wnd = sCurrentWindow.lock();
     if (!wnd) {
         return false;
     }
@@ -418,8 +426,7 @@ bool Fast3dWindow::MouseButtonUp(int button) {
 }
 
 bool Fast3dWindow::MouseButtonDown(int button) {
-    auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
+    auto wnd = sCurrentWindow.lock();
     if (!wnd) {
         return false;
     }
@@ -428,8 +435,7 @@ bool Fast3dWindow::MouseButtonDown(int button) {
 }
 
 void Fast3dWindow::OnFullscreenChanged(bool isNowFullscreen) {
-    auto wnd =
-        std::dynamic_pointer_cast<Fast3dWindow>(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
+    auto wnd = sCurrentWindow.lock();
     if (!wnd) {
         return;
     }

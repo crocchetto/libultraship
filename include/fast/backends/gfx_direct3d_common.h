@@ -79,7 +79,8 @@ class GfxRenderingAPIDX11 final : public GfxRenderingAPI {
   public:
     GfxRenderingAPIDX11() = default;
     ~GfxRenderingAPIDX11() override;
-    GfxRenderingAPIDX11(GfxWindowBackendDXGI* backend);
+    GfxRenderingAPIDX11(GfxWindowBackendDXGI* backend, std::shared_ptr<Ship::ConsoleVariable> consoleVariable = nullptr,
+                        std::shared_ptr<Ship::ResourceManager> resourceManager = nullptr);
     const char* GetName() override;
     int GetMaxTextureSize() override;
     GfxClipParameters GetClipParameters() override;

@@ -28,9 +28,7 @@
 #include "fast/backends/gfx_screen_config.h"
 #include "ship/window/gui/Gui.h"
 #include "fast/Fast3dGui.h"
-#include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
-#include "ship/window/Window.h"
 
 #include "fast/backends/gfx_rendering_api.h"
 #include "fast/interpreter.h"
@@ -53,8 +51,11 @@ static std::shared_ptr<Ship::ResourceManager> sDX11ResourceManager;
 GfxRenderingAPIDX11::~GfxRenderingAPIDX11() {
 }
 
-GfxRenderingAPIDX11::GfxRenderingAPIDX11(GfxWindowBackendDXGI* backend) {
-    mWindowBackend = backend;
+GfxRenderingAPIDX11::GfxRenderingAPIDX11(GfxWindowBackendDXGI* backend,
+                                         std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
+                                         std::shared_ptr<Ship::ResourceManager> resourceManager)
+    : mWindowBackend(backend), mConsoleVariable(std::move(consoleVariable)),
+      mResourceManager(std::move(resourceManager)) {
 }
 
 void GfxRenderingAPIDX11::CreateDepthStencilObjects(uint32_t width, uint32_t height, uint32_t msaa_count,
@@ -359,12 +360,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
     Fast::GuiWindowInitData window_impl;
     window_impl.Dx11 = { mWindowBackend->GetWindowHandle(), mContext.Get(), mDevice.Get() };
-    auto ctx = Ship::Context::GetCurrent();
-    mConsoleVariable = ctx->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    mResourceManager = ctx->GetChildren().GetFirst<Ship::ResourceManager>();
     sDX11ResourceManager = mResourceManager;
-    std::dynamic_pointer_cast<Fast::Fast3dGui>(ctx->GetChildren().GetFirst<Ship::Window>()->GetGui())
-        ->Init(window_impl);
+    if (mWindowBackend->mFast3dGui) {
+        mWindowBackend->mFast3dGui->Init(window_impl);
+    }
 }
 
 int GfxRenderingAPIDX11::GetMaxTextureSize() {
