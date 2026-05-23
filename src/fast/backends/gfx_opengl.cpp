@@ -28,7 +28,10 @@
 
 namespace Fast {
 
+// Cached for free-function include-loader callbacks passed to the prism processor via a raw
+// function pointer (prism::IncludeFunc); lambdas with captures cannot be used there.
 static std::shared_ptr<Ship::ResourceManager> sOGLResourceManager;
+
 GfxRenderingAPIOGL::GfxRenderingAPIOGL(std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
                                        std::shared_ptr<Ship::ResourceManager> resourceManager)
     : mConsoleVariable(std::move(consoleVariable)), mResourceManager(std::move(resourceManager)) {
@@ -320,7 +323,7 @@ std::string GfxRenderingAPIOGL::BuildFsShader(const CCFeatures& cc_features) {
         path = std::string(shaderName) + ".glsl";
     }
 
-    auto res = std::static_pointer_cast<Ship::Shader>(sOGLResourceManager->LoadResource(path, true, init));
+    auto res = std::static_pointer_cast<Ship::Shader>(mResourceManager->LoadResource(path, true, init));
 
     if (res == nullptr) {
         SPDLOG_ERROR("Failed to load default fragment shader, missing f3d.o2r?");

@@ -135,20 +135,14 @@ class ConsoleWindow : public GuiWindow {
     };
 
     static int CallbackStub(ImGuiInputTextCallbackData* data);
-    static int32_t ClearCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                std::string* output);
-    static int32_t HelpCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                               std::string* output);
-    static int32_t UnbindCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                 std::string* output);
-    static int32_t BindCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                               std::string* output);
-    static int32_t BindToggleCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                     std::string* output);
-    static int32_t SetCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
+    int32_t ClearCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args, std::string* output);
+    int32_t HelpCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args, std::string* output);
+    int32_t UnbindCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args, std::string* output);
+    int32_t BindCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args, std::string* output);
+    int32_t BindToggleCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
                               std::string* output);
-    static int32_t GetCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                              std::string* output);
+    int32_t SetCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args, std::string* output);
+    int32_t GetCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args, std::string* output);
     static int32_t CheckVarType(const std::string& input);
 
     int32_t mSelectedId = -1;

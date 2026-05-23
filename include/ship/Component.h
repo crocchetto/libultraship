@@ -70,6 +70,12 @@ class Component : public Part, public std::enable_shared_from_this<Component> {
     /** @brief Returns a human-readable string representation (e.g. "Name (id)"). */
     std::string ToString() const;
 
+    /**
+     * @brief Returns a human-readable tree representation of this component and its children.
+     * @param depth Indentation depth (0 = root).
+     */
+    std::string ToTreeString(int depth = 0) const;
+
     /** @brief Conversion operator to std::string; equivalent to ToString(). */
     explicit operator std::string() const;
 

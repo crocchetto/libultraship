@@ -10,6 +10,7 @@
 #include "ship/config/Config.h"
 #include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
+#include "ship/controller/controldeck/ControlDeck.h"
 #include "ship/debug/Console.h"
 #include "ship/resource/File.h"
 #include "ship/resource/ResourceManager.h"
@@ -48,22 +49,6 @@ Gui::~Gui() {
 
 void Gui::OnInit(const nlohmann::json& initArgs) {
     auto context = GetContext();
-    if ((!mConsoleVariable || !mWindow || !mConfig || !mResourceManager) && !context) {
-        throw std::runtime_error("Component 'Gui' requires dependency 'Context' to exist before use");
-    }
-
-    if (!mConsoleVariable) {
-        mConsoleVariable = context->GetChildren().GetFirst<ConsoleVariable>();
-    }
-    if (!mWindow) {
-        mWindow = context->GetChildren().GetFirst<Window>();
-    }
-    if (!mConfig) {
-        mConfig = context->GetChildren().GetFirst<Config>();
-    }
-    if (!mResourceManager) {
-        mResourceManager = context->GetChildren().GetFirst<ResourceManager>();
-    }
 
     mConsoleVariable = RequireDependency(mConsoleVariable, "ConsoleVariable");
     mWindow = RequireDependency(mWindow, "Window");
@@ -77,9 +62,9 @@ void Gui::OnInit(const nlohmann::json& initArgs) {
     }
 
     if (GetGuiWindow("SDLAddRemoveDeviceEventHandler") == nullptr) {
-        AddGuiWindow(std::make_shared<SDLAddRemoveDeviceEventHandler>(mConsoleVariable, mWindow,
-                                                                      "gOpenWindows.SDLAddRemoveDeviceEventHandler",
-                                                                      "SDLAddRemoveDeviceEventHandler"));
+        AddGuiWindow(std::make_shared<SDLAddRemoveDeviceEventHandler>(
+            mConsoleVariable, mWindow, context->GetChildren().GetFirst<ControlDeck>(),
+            "gOpenWindows.SDLAddRemoveDeviceEventHandler", "SDLAddRemoveDeviceEventHandler"));
     }
 
     if (GetGuiWindow("Console") == nullptr) {

@@ -28,6 +28,7 @@
 #include "ship/debug/CrashHandler.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/config/Config.h"
+#include "ship/window/gui/ComponentHierarchyWindow.h"
 #include "ship/window/gui/ConsoleWindow.h"
 #include "ship/window/gui/GameOverlay.h"
 #include "ship/window/gui/Gui.h"

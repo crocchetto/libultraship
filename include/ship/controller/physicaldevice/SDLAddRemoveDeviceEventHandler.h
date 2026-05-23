@@ -19,13 +19,11 @@ class Window;
 class SDLAddRemoveDeviceEventHandler : public GuiWindow {
   public:
     SDLAddRemoveDeviceEventHandler(std::shared_ptr<ConsoleVariable> consoleVariable, std::shared_ptr<Window> window,
-                                   const std::string& visibilityCvar, const std::string& name);
+                                   std::shared_ptr<ControlDeck> controlDeck, const std::string& visibilityCvar,
+                                   const std::string& name);
     virtual ~SDLAddRemoveDeviceEventHandler();
 
   protected:
-    /** @brief Caches ControlDeck for later use in UpdateElement(). */
-    void OnInit(const nlohmann::json& initArgs) override;
-
     /** @brief No-op – this handler does not draw any visible UI. */
     void DrawElement() override;
 

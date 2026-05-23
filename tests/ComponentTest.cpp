@@ -3,6 +3,11 @@
 #include "ship/Component.h"
 #include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
+#include "ship/debug/Console.h"
+#include "ship/debug/CrashHandler.h"
+#include "ship/events/Events.h"
+#include "ship/resource/ResourceManager.h"
+#include "ship/thread/ThreadPool.h"
 #include "fast/debug/GfxDebugger.h"
 
 using namespace Ship;
@@ -857,3 +862,56 @@ TEST(BuildComponentsFromJsonTest, UnknownTypeIsSkipped) {
     // The known type must still have been added despite the unknown one preceding it.
     EXPECT_NE(ctx->GetFirstInChildren<Fast::GfxDebugger>(), nullptr);
 }
+
+// ---- Component::ToTreeString tests ----
+
+// ToTreeString of a lone component (no children) yields the component name followed by newline.
+TEST(ComponentToTreeStringTest, SingleComponentHasNoIndent) {
+    auto comp = std::make_shared<TestComponent>("RootComp");
+    std::string tree = comp->ToTreeString();
+    EXPECT_EQ(tree, "RootComp\n");
+}
+
+// A child at depth 1 is indented by 2 spaces.
+TEST(ComponentToTreeStringTest, ChildIsIndented) {
+    auto parent = std::make_shared<TestComponent>("Parent");
+    auto child = std::make_shared<TestComponent>("Child");
+    parent->GetChildren().Add(child);
+    std::string tree = parent->ToTreeString();
+    // Parent at depth 0, child at depth 1 (2-space indent).
+    EXPECT_EQ(tree, "Parent\n  Child\n");
+}
+
+// BuildComponentsFromJson: verifies that all types handled by the factory
+// are instantiated as the correct concrete type.
+TEST(BuildComponentsFromJsonTest, CrashHandlerIsCreated) {
+    auto ctx = MakeTestContext();
+    nlohmann::json spec = { { "components", { { { "type", "CrashHandler" } } } } };
+    ASSERT_TRUE(Ship::Context::BuildComponentsFromJson(ctx, spec));
+    EXPECT_NE(ctx->GetFirstInChildren<Ship::CrashHandler>(), nullptr);
+}
+
+TEST(BuildComponentsFromJsonTest, ConsoleIsCreated) {
+    auto ctx = MakeTestContext();
+    nlohmann::json spec = { { "components", { { { "type", "Console" } } } } };
+    ASSERT_TRUE(Ship::Context::BuildComponentsFromJson(ctx, spec));
+    EXPECT_NE(ctx->GetFirstInChildren<Ship::Console>(), nullptr);
+}
+
+TEST(BuildComponentsFromJsonTest, EventsIsCreated) {
+    auto ctx = MakeTestContext();
+    nlohmann::json spec = { { "components", { { { "type", "Events" } } } } };
+    ASSERT_TRUE(Ship::Context::BuildComponentsFromJson(ctx, spec));
+    EXPECT_NE(ctx->GetFirstInChildren<Ship::Events>(), nullptr);
+}
+
+TEST(BuildComponentsFromJsonTest, ThreadPoolIsCreated) {
+    auto ctx = MakeTestContext();
+    nlohmann::json spec = { { "components", { { { "type", "ThreadPool" } } } } };
+    ASSERT_TRUE(Ship::Context::BuildComponentsFromJson(ctx, spec));
+    EXPECT_NE(ctx->GetFirstInChildren<Ship::ThreadPool>(), nullptr);
+}
+
+// ResourceManager requires archive files at initialization time; it cannot be meaningfully
+// tested without a real .otr archive. The BuildComponentsFromJson path for ResourceManager is
+// already exercised indirectly through CreateDefaultInstance in Context tests.

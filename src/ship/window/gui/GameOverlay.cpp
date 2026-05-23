@@ -6,7 +6,6 @@
 #include "ship/window/gui/resource/FontFactory.h"
 #include "ship/resource/archive/Archive.h"
 #include "ship/resource/ResourceManager.h"
-#include "ship/Context.h"
 #include "ship/window/Window.h"
 #include "ship/window/gui/Gui.h"
 #include "ship/utils/StringHelper.h"
@@ -160,22 +159,6 @@ ImVec2 GameOverlay::CalculateTextSize(const char* text, const char* textEnd, boo
 }
 
 void GameOverlay::OnInit(const nlohmann::json& /*initArgs*/) {
-    if (!mResourceManager || !mConsoleVariables || !mWindow) {
-        auto context = GetContext();
-        if (!context) {
-            throw std::runtime_error("Component 'GameOverlay' requires dependency 'Context' to exist before use");
-        }
-        if (!mResourceManager) {
-            mResourceManager = context->GetChildren().GetFirst<ResourceManager>();
-        }
-        if (!mConsoleVariables) {
-            mConsoleVariables = context->GetChildren().GetFirst<ConsoleVariable>();
-        }
-        if (!mWindow) {
-            mWindow = context->GetChildren().GetFirst<Window>();
-        }
-    }
-
     mResourceManager = RequireDependency(mResourceManager, "ResourceManager");
     mConsoleVariables = RequireDependency(mConsoleVariables, "ConsoleVariable");
     mWindow = RequireDependency(mWindow, "Window");

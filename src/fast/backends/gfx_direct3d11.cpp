@@ -46,6 +46,8 @@ using namespace Microsoft::WRL; // For ComPtr
 
 namespace Fast {
 
+// Cached for free-function include-loader callbacks passed to the prism processor via a raw
+// function pointer (prism::IncludeFunc); lambdas with captures cannot be used there.
 static std::shared_ptr<Ship::ResourceManager> sDX11ResourceManager;
 
 GfxRenderingAPIDX11::~GfxRenderingAPIDX11() {
@@ -360,10 +362,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
     Fast::GuiWindowInitData window_impl;
     window_impl.Dx11 = { mWindowBackend->GetWindowHandle(), mContext.Get(), mDevice.Get() };
-    sDX11ResourceManager = mResourceManager;
     if (mWindowBackend->mFast3dGui) {
         mWindowBackend->mFast3dGui->Init(window_impl);
     }
+    sDX11ResourceManager = mResourceManager;
 }
 
 int GfxRenderingAPIDX11::GetMaxTextureSize() {

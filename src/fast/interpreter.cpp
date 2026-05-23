@@ -122,6 +122,7 @@ Interpreter::~Interpreter() {
 }
 
 static std::weak_ptr<Interpreter> mInstance;
+// Cached for free-function callbacks that cannot capture context (plain function pointers).
 static std::shared_ptr<Ship::ResourceManager> sResourceManager;
 // Set a cached pointer to the instance so we don't need to go through the window every time
 void GfxSetInstance(std::shared_ptr<Interpreter> gfx) {
@@ -4799,8 +4800,8 @@ void Interpreter::Init(class GfxWindowBackend* wapi, class GfxRenderingAPI* rapi
     mWapi = wapi;
     mRapi = rapi;
     mResourceManager = std::move(resourceManager);
-    mConsoleVariable = std::move(consoleVariable);
     sResourceManager = mResourceManager;
+    mConsoleVariable = std::move(consoleVariable);
     mWapi->Init(game_name, rapi->GetName(), start_in_fullscreen, width, height, posX, posY);
     mRapi->Init();
     mRapi->UpdateFramebufferParameters(0, width, height, 1, false, true, true, true);

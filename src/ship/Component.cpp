@@ -29,6 +29,16 @@ std::string Component::ToString() const {
     return std::to_string(GetId()) + "-" + GetName() + "-" + typeid(*this).name();
 }
 
+std::string Component::ToTreeString(int depth) const {
+    std::string indent(depth * 2, ' ');
+    std::string result = indent + GetName() + "\n";
+    auto children = mChildren.Get();
+    for (const auto& child : *children) {
+        result += child->ToTreeString(depth + 1);
+    }
+    return result;
+}
+
 Component::operator std::string() const {
     return ToString();
 }

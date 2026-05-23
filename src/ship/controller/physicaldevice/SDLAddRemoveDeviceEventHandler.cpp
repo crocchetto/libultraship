@@ -1,27 +1,20 @@
 #include "ship/controller/physicaldevice/SDLAddRemoveDeviceEventHandler.h"
 #include <SDL2/SDL.h>
-#include "ship/Context.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 
 namespace Ship {
 
 SDLAddRemoveDeviceEventHandler::SDLAddRemoveDeviceEventHandler(std::shared_ptr<ConsoleVariable> consoleVariable,
                                                                std::shared_ptr<Window> window,
+                                                               std::shared_ptr<ControlDeck> controlDeck,
                                                                const std::string& visibilityCvar,
                                                                const std::string& name)
     : GuiWindow(std::move(consoleVariable), std::move(window), visibilityCvar, false, name, ImVec2{ -1, -1 },
-                ImGuiWindowFlags_None) {
+                ImGuiWindowFlags_None),
+      mControlDeck(std::move(controlDeck)) {
 }
 
 SDLAddRemoveDeviceEventHandler::~SDLAddRemoveDeviceEventHandler() {
-}
-
-void SDLAddRemoveDeviceEventHandler::OnInit(const nlohmann::json& initArgs) {
-    GuiWindow::OnInit(initArgs);
-    auto context = GetContext();
-    if (context) {
-        mControlDeck = context->GetChildren().GetFirst<ControlDeck>();
-    }
 }
 
 void SDLAddRemoveDeviceEventHandler::DrawElement() {

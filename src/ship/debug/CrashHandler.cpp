@@ -16,7 +16,14 @@
 
 namespace Ship {
 static std::weak_ptr<CrashHandler> sCrashHandler;
-static std::string sCrashAppName = "Application";
+static std::string GetCrashAppName() {
+    if (auto handler = sCrashHandler.lock()) {
+        if (auto ctx = handler->GetContext()) {
+            return ctx->GetName();
+        }
+    }
+    return "Application";
+}
 
 #define WRITE_VAR_LINE(handler, varName, varValue) \
     handler->AppendStr(varName);                   \
@@ -195,8 +202,8 @@ static void ErrorHandler(int sig, siginfo_t* sigInfo, void* data) {
         snprintf(intToCharBuffer, sizeof(intToCharBuffer), "%i ", (int)i);
         WRITE_VAR_LINE(crashHandler, intToCharBuffer, functionName.c_str());
     }
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, (sCrashAppName + " has crashed").c_str(),
-                             (sCrashAppName + " has crashed. Please upload the logs to the support channel in discord.")
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, (GetCrashAppName() + " has crashed").c_str(),
+                             (GetCrashAppName() + " has crashed. Please upload the logs to the support channel in discord.")
                                  .c_str(),
                              nullptr);
     free(symbols);
@@ -417,7 +424,7 @@ extern "C" LONG WINAPI seh_filter(PEXCEPTION_POINTERS ex) {
     crashHandler->PrintStack(ex->ContextRecord);
     MessageBoxA(
         nullptr,
-        (sCrashAppName + " has crashed. Please upload the logs to the support channel in discord.").c_str(),
+        (GetCrashAppName() + " has crashed. Please upload the logs to the support channel in discord.").c_str(),
         "Crash", MB_OK | MB_ICONERROR);
 
     return EXCEPTION_EXECUTE_HANDLER;
@@ -461,9 +468,6 @@ CrashHandler::~CrashHandler() {
 void CrashHandler::OnAdded(bool forced) {
     Component::OnAdded(forced);
     sCrashHandler = std::dynamic_pointer_cast<CrashHandler>(GetSharedComponent());
-    if (auto context = GetContext()) {
-        sCrashAppName = context->GetName();
-    }
 }
 
 void CrashHandler::RegisterCallback(CrashHandlerCallback callback) {
