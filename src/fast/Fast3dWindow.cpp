@@ -124,7 +124,8 @@ void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
     InitWindowManager();
     mGfxDebugger = std::make_shared<GfxDebugger>();
     mInterpreter->SetGfxDebugger(mGfxDebugger);
-    mInterpreter->Init(mWindowManagerApi, mRenderingApi, GetName().c_str(), isFullscreen, width, height, posX, posY);
+    mInterpreter->Init(mWindowManagerApi, mRenderingApi, GetName().c_str(), isFullscreen, width, height, posX, posY,
+                       GetConsoleVariables(), GetContext()->GetChildren().GetFirst<Ship::ResourceManager>());
     mWindowManagerApi->SetFullscreenChangedCallback(OnFullscreenChanged);
     mWindowManagerApi->SetKeyboardCallbacks(KeyDown, KeyUp, AllKeysUp);
     mWindowManagerApi->SetMouseCallbacks(MouseButtonDown, MouseButtonUp);
@@ -178,14 +179,20 @@ void Fast3dWindow::InitWindowManager() {
 #endif
 #ifdef ENABLE_OPENGL
         case WindowBackend::FAST3D_SDL_OPENGL:
-            mRenderingApi = new GfxRenderingAPIOGL();
-            mWindowManagerApi = new GfxWindowBackendSDL2();
+            mWindowManagerApi =
+                new GfxWindowBackendSDL2(GetConfig(), GetContext()->GetChildren().GetFirst<Ship::FileDrop>(),
+                                         GetConsoleVariables(), std::dynamic_pointer_cast<Fast::Fast3dGui>(GetGui()));
+            mRenderingApi =
+                new GfxRenderingAPIOGL(GetConsoleVariables(), GetContext()->GetChildren().GetFirst<Ship::ResourceManager>());
             break;
 #endif
 #ifdef __APPLE__
         case WindowBackend::FAST3D_SDL_METAL:
-            mRenderingApi = new GfxRenderingAPIMetal();
-            mWindowManagerApi = new GfxWindowBackendSDL2();
+            mWindowManagerApi =
+                new GfxWindowBackendSDL2(GetConfig(), GetContext()->GetChildren().GetFirst<Ship::FileDrop>(),
+                                         GetConsoleVariables(), std::dynamic_pointer_cast<Fast::Fast3dGui>(GetGui()));
+            mRenderingApi = new GfxRenderingAPIMetal(GetConsoleVariables(),
+                                                     GetContext()->GetChildren().GetFirst<Ship::ResourceManager>());
             break;
 #endif
         default:

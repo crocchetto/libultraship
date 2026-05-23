@@ -1,13 +1,17 @@
 #include "libultraship/bridge/controllerbridge.h"
 #include "ship/controller/controldeck/ControlDeck.h"
-#include "ship/Context.h"
 
 static std::shared_ptr<Ship::ControlDeck> sControlDeck;
 
+void ControllerSetControlDeck(std::shared_ptr<Ship::ControlDeck> controlDeck) {
+    sControlDeck = std::move(controlDeck);
+}
+
+std::shared_ptr<Ship::ControlDeck> ControllerGetControlDeck() {
+    return sControlDeck;
+}
+
 static Ship::ControlDeck* GetControlDeck() {
-    if (!sControlDeck) {
-        sControlDeck = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ControlDeck>();
-    }
     return sControlDeck.get();
 }
 

@@ -379,7 +379,9 @@ class Interpreter {
     ~Interpreter();
 
     void Init(GfxWindowBackend* wapi, class GfxRenderingAPI* rapi, const char* game_name, bool start_in_fullscreen,
-              uint32_t width, uint32_t height, uint32_t posX, uint32_t posY);
+              uint32_t width, uint32_t height, uint32_t posX, uint32_t posY,
+              std::shared_ptr<Ship::ConsoleVariable> consoleVariable = nullptr,
+              std::shared_ptr<Ship::ResourceManager> resourceManager = nullptr);
     void Destroy();
     void SetGfxDebugger(std::shared_ptr<GfxDebugger> debugger);
     std::shared_ptr<GfxDebugger> GetGfxDebugger() const;

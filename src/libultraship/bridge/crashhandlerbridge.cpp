@@ -1,13 +1,17 @@
 #include "libultraship/bridge/crashhandlerbridge.h"
-#include "ship/Context.h"
 #include "ship/debug/CrashHandler.h"
 
 static std::shared_ptr<Ship::CrashHandler> sCrashHandler;
 
+void CrashHandlerSetComponent(std::shared_ptr<Ship::CrashHandler> crashHandler) {
+    sCrashHandler = std::move(crashHandler);
+}
+
+std::shared_ptr<Ship::CrashHandler> CrashHandlerGetComponent() {
+    return sCrashHandler;
+}
+
 static Ship::CrashHandler* GetCrashHandler() {
-    if (!sCrashHandler) {
-        sCrashHandler = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::CrashHandler>();
-    }
     return sCrashHandler.get();
 }
 

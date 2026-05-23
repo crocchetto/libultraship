@@ -1,6 +1,5 @@
 #include "libultraship/bridge/gfxbridge.h"
 
-#include "ship/Context.h"
 #include "fast/Fast3dWindow.h"
 #include "fast/interpreter.h"
 
@@ -8,11 +7,15 @@
 
 static std::shared_ptr<Fast::Fast3dWindow> sFast3dWindow;
 
+void GfxSetFast3dWindow(std::shared_ptr<Fast::Fast3dWindow> window) {
+    sFast3dWindow = std::move(window);
+}
+
+std::shared_ptr<Fast::Fast3dWindow> GfxGetFast3dWindow() {
+    return sFast3dWindow;
+}
+
 static Fast::Fast3dWindow* GetFast3dWindow() {
-    if (!sFast3dWindow) {
-        sFast3dWindow = std::dynamic_pointer_cast<Fast::Fast3dWindow>(
-            Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>());
-    }
     return sFast3dWindow.get();
 }
 

@@ -1,13 +1,17 @@
 #include "libultraship/bridge/windowbridge.h"
 #include "ship/window/Window.h"
-#include "ship/Context.h"
 
 static std::shared_ptr<Ship::Window> sWindow;
 
+void WindowSetWindowComponent(std::shared_ptr<Ship::Window> window) {
+    sWindow = std::move(window);
+}
+
+std::shared_ptr<Ship::Window> WindowGetWindowComponent() {
+    return sWindow;
+}
+
 static Ship::Window* GetWindow() {
-    if (!sWindow) {
-        sWindow = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>();
-    }
     return sWindow.get();
 }
 

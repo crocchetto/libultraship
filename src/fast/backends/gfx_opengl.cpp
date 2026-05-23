@@ -22,7 +22,6 @@
 #include "ship/window/gui/Gui.h"
 #include <prism/processor.h>
 #include <fstream>
-#include "ship/Context.h"
 #include "ship/resource/factory/ShaderFactory.h"
 #include "fast/interpreter.h"
 #include "ship/config/ConsoleVariable.h"
@@ -30,6 +29,11 @@
 namespace Fast {
 
 static std::shared_ptr<Ship::ResourceManager> sOGLResourceManager;
+GfxRenderingAPIOGL::GfxRenderingAPIOGL(std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
+                                       std::shared_ptr<Ship::ResourceManager> resourceManager)
+    : mConsoleVariable(std::move(consoleVariable)), mResourceManager(std::move(resourceManager)) {
+}
+
 int GfxRenderingAPIOGL::GetMaxTextureSize() {
     GLint max_texture_size;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
@@ -741,8 +745,7 @@ void GfxRenderingAPIOGL::Init() {
 
     glGetIntegerv(GL_MAX_SAMPLES, &mMaxMsaaLevel);
 
-    mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    sOGLResourceManager = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>();
+    sOGLResourceManager = mResourceManager;
 }
 
 void GfxRenderingAPIOGL::OnResize() {

@@ -8,6 +8,7 @@
 #include "ship/install_config.h"
 #include "ship/default_context_json.h" // Auto-generated from default_context.json by CMake
 #include "fast/debug/GfxDebugger.h"
+#include "fast/Fast3dWindow.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 #include "ship/debug/Console.h"
@@ -17,7 +18,17 @@
 #include "ship/log/Logger.h"
 #include "ship/thread/ThreadPool.h"
 #include "ship/events/Events.h"
+#include "libultraship/bridge/audiobridge.h"
+#include "libultraship/bridge/consolevariablebridge.h"
+#include "libultraship/bridge/controllerbridge.h"
+#include "libultraship/bridge/crashhandlerbridge.h"
+#include "libultraship/bridge/eventsbridge.h"
+#include "libultraship/bridge/gfxbridge.h"
+#include "libultraship/bridge/gfxdebuggerbridge.h"
+#include "libultraship/bridge/resourcebridge.h"
+#include "libultraship/bridge/windowbridge.h"
 #ifdef ENABLE_SCRIPTING
+#include "libultraship/bridge/scriptingbridge.h"
 #include "ship/scripting/ScriptLoader.h"
 #include "ship/security/Keystore.h"
 #endif
@@ -36,10 +47,19 @@
 #endif
 
 namespace Ship {
-std::weak_ptr<Context> Context::mContext;
-
-std::shared_ptr<Context> Context::GetCurrent() {
-    return mContext.lock();
+static void UpdateBridgeCaches(const std::shared_ptr<Context>& context) {
+    ResourceSetResourceManager(context->GetChildren().GetFirst<ResourceManager>());
+    CVarSetConsoleVariable(context->GetChildren().GetFirst<ConsoleVariable>());
+    WindowSetWindowComponent(context->GetChildren().GetFirst<Window>());
+    ControllerSetControlDeck(context->GetChildren().GetFirst<ControlDeck>());
+    EventSystemSetEvents(context->GetChildren().GetFirst<Events>());
+    AudioSetAudioComponent(context->GetChildren().GetFirst<Audio>());
+    CrashHandlerSetComponent(context->GetChildren().GetFirst<CrashHandler>());
+    GfxDebuggerSetComponent(context->GetChildren().GetFirst<Fast::GfxDebugger>());
+    GfxSetFast3dWindow(std::dynamic_pointer_cast<Fast::Fast3dWindow>(context->GetChildren().GetFirst<Window>()));
+#ifdef ENABLE_SCRIPTING
+    ScriptSetLoader(context->GetChildren().GetFirst<ScriptLoader>());
+#endif
 }
 
 Context::~Context() {
@@ -76,13 +96,7 @@ std::shared_ptr<Context> Context::CreateDefaultInstance(const std::string& name,
                                                         uint32_t reservedThreadCount, AudioSettings audioSettings,
                                                         std::shared_ptr<Component> window,
                                                         std::shared_ptr<Component> controlDeck) {
-    if (!mContext.expired()) {
-        SPDLOG_DEBUG("Trying to create a context when it already exists. Returning existing.");
-        return GetCurrent();
-    }
-
     auto shared = std::make_shared<Context>(name, shortName);
-    mContext = shared;
     // The Context is the root of the hierarchy; set itself as its own Context so that
     // all children added later can find it via GetContext().
     shared->SetContext(shared);
@@ -204,6 +218,7 @@ std::shared_ptr<Context> Context::CreateDefaultInstance(const std::string& name,
     window->Init();
     fileDropMgr->Init();
     audio->Init();
+    UpdateBridgeCaches(shared);
 
     return shared;
 }
@@ -387,17 +402,12 @@ bool Context::BuildComponentsFromJson(std::shared_ptr<Context> context, const nl
         initEntry(entry);
     }
 
+    UpdateBridgeCaches(context);
     return true;
 }
 
 std::shared_ptr<Context> Context::CreateInstance(const std::string& name, const std::string& shortName) {
-    if (!mContext.expired()) {
-        SPDLOG_DEBUG("Trying to create a context when it already exists. Returning existing.");
-        return GetCurrent();
-    }
-
     auto shared = std::make_shared<Context>(name, shortName);
-    mContext = shared;
     shared->SetContext(shared);
     return shared;
 }
@@ -409,6 +419,7 @@ std::shared_ptr<Context> Context::CreateInstance(const std::string& name, const 
         ctx->GetChildren().Add(component);
         component->Init();
     }
+    UpdateBridgeCaches(ctx);
     return ctx;
 }
 
@@ -519,7 +530,7 @@ std::string Context::GetAppDirectoryPath(const std::string& appName) {
 #endif
 
 #ifdef NON_PORTABLE
-    const std::string& effectiveAppName = appName.empty() ? GetCurrent()->mShortName : appName;
+    const std::string effectiveAppName = appName.empty() ? "libultraship" : appName;
     char* prefpath = SDL_GetPrefPath(NULL, effectiveAppName.c_str());
     if (prefpath != NULL) {
         std::string ret(prefpath);

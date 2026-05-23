@@ -1,13 +1,17 @@
 #include "libultraship/bridge/audiobridge.h"
-#include "ship/Context.h"
 #include "ship/audio/Audio.h"
 
 static std::shared_ptr<Ship::Audio> sAudio;
 
+void AudioSetAudioComponent(std::shared_ptr<Ship::Audio> audio) {
+    sAudio = std::move(audio);
+}
+
+std::shared_ptr<Ship::Audio> AudioGetAudioComponent() {
+    return sAudio;
+}
+
 static Ship::Audio* GetAudio() {
-    if (!sAudio) {
-        sAudio = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Audio>();
-    }
     return sAudio.get();
 }
 

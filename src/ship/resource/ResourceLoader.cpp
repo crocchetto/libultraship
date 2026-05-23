@@ -3,7 +3,6 @@
 #include "ship/resource/ResourceManager.h"
 #include "ship/resource/Resource.h"
 #include "ship/resource/File.h"
-#include "ship/Context.h"
 #include "ship/utils/binarytools/MemoryStream.h"
 #include "ship/utils/binarytools/BinaryReader.h"
 #include "ship/resource/factory/JsonFactory.h"
@@ -13,7 +12,7 @@
 #include "nlohmann/json.hpp"
 
 namespace Ship {
-ResourceLoader::ResourceLoader() {
+ResourceLoader::ResourceLoader(std::shared_ptr<ResourceManager> resourceManager) : mResourceManager(std::move(resourceManager)) {
     RegisterGlobalResourceFactories();
 }
 
@@ -157,14 +156,6 @@ std::shared_ptr<ResourceInitData> ResourceLoader::ReadResourceInitData(const std
                                                                        std::shared_ptr<File> metaFileToLoad) {
     auto initData = CreateDefaultResourceInitData();
 
-    if (!mResourceManager) {
-        auto context = Context::GetCurrent();
-        if (context == nullptr) {
-            SPDLOG_ERROR("Failed to read resource init data for {}: no active context", filePath);
-            return initData;
-        }
-        mResourceManager = context->GetChildren().GetFirst<ResourceManager>();
-    }
     auto resourceManager = mResourceManager;
     if (resourceManager == nullptr) {
         SPDLOG_ERROR("Failed to read resource init data for {}: no ResourceManager available", filePath);
@@ -203,14 +194,6 @@ std::shared_ptr<IResource> ResourceLoader::LoadResource(std::string filePath, st
     }
 
     if (initData == nullptr) {
-        if (!mResourceManager) {
-            auto context = Context::GetCurrent();
-            if (context == nullptr) {
-                SPDLOG_ERROR("Failed to load resource {}: no active context", filePath);
-                return nullptr;
-            }
-            mResourceManager = context->GetChildren().GetFirst<ResourceManager>();
-        }
         auto resourceManager = mResourceManager;
         if (resourceManager == nullptr) {
             SPDLOG_ERROR("Failed to load resource {}: no ResourceManager available", filePath);
@@ -312,13 +295,7 @@ ResourceLoader::ReadResourceInitDataXml(const std::string& filePath, std::shared
     resourceInitData->Format = RESOURCE_FORMAT_XML;
 
     auto root = document->FirstChildElement();
-    auto context = Context::GetCurrent();
-    if (context == nullptr) {
-        SPDLOG_ERROR("Error reading OTR header from XML: No active context for file {}", filePath);
-        return resourceInitData;
-    }
-
-    auto resourceManager = context->GetChildren().GetFirst<ResourceManager>();
+    auto resourceManager = mResourceManager;
     if (resourceManager == nullptr) {
         SPDLOG_ERROR("Error reading OTR header from XML: No ResourceManager for file {}", filePath);
         return resourceInitData;

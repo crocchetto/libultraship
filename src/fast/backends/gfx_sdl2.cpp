@@ -8,7 +8,6 @@
 #define FOR_WINDOWS 0
 #endif
 
-#include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 #include "ship/window/FileDrop.h"
@@ -208,6 +207,13 @@ const SDL_Scancode scancode_rmapping_nonextended[][2] = { { SDL_SCANCODE_KP_7, S
                                                           { SDL_SCANCODE_KP_0, SDL_SCANCODE_INSERT },
                                                           { SDL_SCANCODE_KP_PERIOD, SDL_SCANCODE_DELETE },
                                                           { SDL_SCANCODE_KP_MULTIPLY, SDL_SCANCODE_PRINTSCREEN } };
+
+GfxWindowBackendSDL2::GfxWindowBackendSDL2(std::shared_ptr<Ship::Config> config, std::shared_ptr<Ship::FileDrop> fileDrop,
+                                           std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
+                                           std::shared_ptr<Fast::Fast3dGui> fast3dGui)
+    : mConsoleVariable(std::move(consoleVariable)), mConfig(std::move(config)), mFileDrop(std::move(fileDrop)),
+      mFast3dGui(std::move(fast3dGui)) {
+}
 
 GfxWindowBackendSDL2::~GfxWindowBackendSDL2() {
 }
@@ -432,16 +438,9 @@ void GfxWindowBackendSDL2::Init(const char* gameName, const char* gfxApiName, bo
         window_impl.Metal = { mWnd, mRenderer };
     }
 
-    if (auto window = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Window>()) {
-        mFast3dGui = std::dynamic_pointer_cast<Fast::Fast3dGui>(window->GetGui());
-        if (mFast3dGui) {
-            mFast3dGui->Init(window_impl);
-        }
+    if (mFast3dGui) {
+        mFast3dGui->Init(window_impl);
     }
-
-    mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    mConfig = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Config>();
-    mFileDrop = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::FileDrop>();
 
     for (size_t i = 0; i < std::size(lus_to_sdl_table); i++) {
         mSdlToLusTable[lus_to_sdl_table[i]] = i;

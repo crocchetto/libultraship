@@ -7,6 +7,7 @@
 
 namespace Ship {
 class ConsoleVariable;
+class ResourceManager;
 } // namespace Ship
 
 #ifdef _MSC_VER
@@ -63,6 +64,8 @@ struct TextureInfo {
 
 class GfxRenderingAPIOGL final : public GfxRenderingAPI {
   public:
+    GfxRenderingAPIOGL(std::shared_ptr<Ship::ConsoleVariable> consoleVariable = nullptr,
+                       std::shared_ptr<Ship::ResourceManager> resourceManager = nullptr);
     ~GfxRenderingAPIOGL() override = default;
     const char* GetName() override;
     int GetMaxTextureSize() override;
@@ -116,6 +119,7 @@ class GfxRenderingAPIOGL final : public GfxRenderingAPI {
     void SetPerDrawUniforms();
 
     std::shared_ptr<Ship::ConsoleVariable> mConsoleVariable;
+    std::shared_ptr<Ship::ResourceManager> mResourceManager;
 
     std::vector<TextureInfo> textures;
     GLuint mCurrentTextureIds[SHADER_MAX_TEXTURES] = {};

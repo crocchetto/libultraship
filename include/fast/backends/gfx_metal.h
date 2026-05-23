@@ -16,6 +16,7 @@
 
 namespace Ship {
 class ConsoleVariable;
+class ResourceManager;
 } // namespace Ship
 
 static constexpr size_t kMaxVertexBufferPoolSize = 3;
@@ -133,6 +134,8 @@ struct CoordUniforms {
 
 class GfxRenderingAPIMetal final : public GfxRenderingAPI {
   public:
+    GfxRenderingAPIMetal(std::shared_ptr<Ship::ConsoleVariable> consoleVariable = nullptr,
+                         std::shared_ptr<Ship::ResourceManager> resourceManager = nullptr);
     ~GfxRenderingAPIMetal() override = default;
     const char* GetName() override;
     int GetMaxTextureSize() override;
@@ -215,6 +218,8 @@ class GfxRenderingAPIMetal final : public GfxRenderingAPI {
     MTL::Function* mDepthComputeFunction;
     MTL::Function* mConvertToRgb5a1Function;
     MTL::ComputePipelineState* mConvertToRgb5a1PipelineState = nullptr;
+    std::shared_ptr<Ship::ConsoleVariable> mConsoleVariable;
+    std::shared_ptr<Ship::ResourceManager> mResourceManager;
 
     // Screen FB deferred readback: blit in EndFrame, CPU conversion next frame.
     // mScreenReadbackCmdBuf retains the command buffer that encoded the blit so
@@ -241,7 +246,6 @@ class GfxRenderingAPIMetal final : public GfxRenderingAPI {
     FilteringMode mCurrentFilterMode = FILTER_THREE_POINT;
 
     bool mNonUniformThreadgroupSupported;
-    std::shared_ptr<Ship::ConsoleVariable> mConsoleVariable;
 };
 
 } // namespace Fast

@@ -50,7 +50,7 @@ struct ResourceFactoryKeyHash {
  */
 class ResourceLoader {
   public:
-    ResourceLoader();
+    explicit ResourceLoader(std::shared_ptr<ResourceManager> resourceManager = nullptr);
     virtual ~ResourceLoader();
 
     /**

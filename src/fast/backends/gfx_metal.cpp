@@ -35,7 +35,6 @@
 #include "fast/backends/gfx_metal_shader.h"
 
 #include "libultraship/libultra/abi.h"
-#include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
 #include "ship/resource/ResourceManager.h"
 
@@ -43,6 +42,11 @@
 
 // MARK: - Helpers
 namespace Fast {
+
+GfxRenderingAPIMetal::GfxRenderingAPIMetal(std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
+                                           std::shared_ptr<Ship::ResourceManager> resourceManager)
+    : mConsoleVariable(std::move(consoleVariable)), mResourceManager(std::move(resourceManager)) {
+}
 
 static MTL::SamplerAddressMode gfx_cm_to_metal(uint32_t val) {
     switch (val) {
@@ -195,8 +199,7 @@ void GfxRenderingAPIMetal::Init() {
     library->release();
     autorelease_pool->release();
 
-    mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    gfx_metal_shader_set_resource_manager(Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>());
+    gfx_metal_shader_set_resource_manager(mResourceManager);
 }
 
 struct GfxClipParameters GfxRenderingAPIMetal::GetClipParameters() {

@@ -32,7 +32,6 @@
 #include "ship/window/gui/Gui.h"
 #include "ship/resource/ResourceManager.h"
 #include "ship/utils/Utils.h"
-#include "ship/Context.h"
 #include "ship/config/ConsoleVariable.h"
 
 #include "libultraship/libultra/os.h"
@@ -4794,11 +4793,13 @@ void Interpreter::GetDimensions(uint32_t* width, uint32_t* height, int32_t* posX
 }
 
 void Interpreter::Init(class GfxWindowBackend* wapi, class GfxRenderingAPI* rapi, const char* game_name,
-                       bool start_in_fullscreen, uint32_t width, uint32_t height, uint32_t posX, uint32_t posY) {
+                       bool start_in_fullscreen, uint32_t width, uint32_t height, uint32_t posX, uint32_t posY,
+                       std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
+                       std::shared_ptr<Ship::ResourceManager> resourceManager) {
     mWapi = wapi;
     mRapi = rapi;
-    mResourceManager = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>();
-    mConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
+    mResourceManager = std::move(resourceManager);
+    mConsoleVariable = std::move(consoleVariable);
     sResourceManager = mResourceManager;
     mWapi->Init(game_name, rapi->GetName(), start_in_fullscreen, width, height, posX, posY);
     mRapi->Init();

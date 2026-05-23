@@ -3,16 +3,20 @@
 #ifdef ENABLE_SCRIPTING
 
 #include "ship/scripting/ScriptLoader.h"
-#include "ship/Context.h"
 
 // Dependency: requires Ship::ScriptLoader component to be present in Ship::Context (only when ENABLE_SCRIPTING is set).
 
 static std::shared_ptr<Ship::ScriptLoader> sScriptLoader;
 
+void ScriptSetLoader(std::shared_ptr<Ship::ScriptLoader> scriptLoader) {
+    sScriptLoader = std::move(scriptLoader);
+}
+
+std::shared_ptr<Ship::ScriptLoader> ScriptGetLoader() {
+    return sScriptLoader;
+}
+
 static Ship::ScriptLoader* GetScriptLoader() {
-    if (!sScriptLoader) {
-        sScriptLoader = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ScriptLoader>();
-    }
     return sScriptLoader.get();
 }
 

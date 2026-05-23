@@ -1,13 +1,17 @@
 #include "libultraship/bridge/eventsbridge.h"
 #include "ship/events/Events.h"
-#include "ship/Context.h"
 
 static std::shared_ptr<Ship::Events> sEvents;
 
+void EventSystemSetEvents(std::shared_ptr<Ship::Events> events) {
+    sEvents = std::move(events);
+}
+
+std::shared_ptr<Ship::Events> EventSystemGetEvents() {
+    return sEvents;
+}
+
 static Ship::Events* GetEvents() {
-    if (!sEvents) {
-        sEvents = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::Events>();
-    }
     return sEvents.get();
 }
 

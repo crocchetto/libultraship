@@ -1,12 +1,16 @@
 #include "libultraship/bridge/consolevariablebridge.h"
-#include "ship/Context.h"
 
 static std::shared_ptr<Ship::ConsoleVariable> sConsoleVariable;
 
+void CVarSetConsoleVariable(std::shared_ptr<Ship::ConsoleVariable> consoleVariable) {
+    sConsoleVariable = std::move(consoleVariable);
+}
+
+std::shared_ptr<Ship::ConsoleVariable> CVarGetConsoleVariable() {
+    return sConsoleVariable;
+}
+
 static Ship::ConsoleVariable* GetConsoleVariable() {
-    if (!sConsoleVariable) {
-        sConsoleVariable = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ConsoleVariable>();
-    }
     return sConsoleVariable.get();
 }
 

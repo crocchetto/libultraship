@@ -3,12 +3,12 @@
 #include "ship/config/ConsoleVariable.h"
 #include "ship/window/Window.h"
 #include "ship/window/gui/Gui.h"
-#include "ship/Context.h"
 #include "ship/utils/StringHelper.h"
 #include "ship/utils/Utils.h"
 #include <sstream>
 
 namespace Ship {
+static std::weak_ptr<ConsoleWindow> sCachedConsoleWindow;
 
 // Forward declaration - defined below ConsoleWindow::~ConsoleWindow
 static std::shared_ptr<ConsoleWindow> GetCachedConsoleWindow();
@@ -202,7 +202,21 @@ int32_t ConsoleWindow::SetCommand(std::shared_ptr<Console> console, const std::v
 
     int vType = CheckVarType(args[2]);
 
-    auto consoleVariables = Ship::Context::GetCurrent()->GetChildren().GetFirst<ConsoleVariable>();
+    auto window = GetCachedConsoleWindow();
+    if (!window) {
+        if (output) {
+            *output += "Console window not initialized.";
+        }
+        return 1;
+    }
+    auto context = window->GetContext();
+    auto consoleVariables = context ? context->GetChildren().GetFirst<ConsoleVariable>() : nullptr;
+    if (!consoleVariables) {
+        if (output) {
+            *output += "Console variables unavailable.";
+        }
+        return 1;
+    }
 
     if (vType == VARTYPE_STRING) {
         consoleVariables->SetString(args[1].c_str(), args[2].c_str());
@@ -235,7 +249,16 @@ int32_t ConsoleWindow::GetCommand(std::shared_ptr<Console> console, const std::v
         return 1;
     }
 
-    auto cvar = Ship::Context::GetCurrent()->GetChildren().GetFirst<ConsoleVariable>()->Get(args[1].c_str());
+    auto window = GetCachedConsoleWindow();
+    auto context = window ? window->GetContext() : nullptr;
+    auto consoleVariables = context ? context->GetChildren().GetFirst<ConsoleVariable>() : nullptr;
+    if (!consoleVariables) {
+        if (output) {
+            *output += "Console variables unavailable.";
+        }
+        return 1;
+    }
+    auto cvar = consoleVariables->Get(args[1].c_str());
 
     if (cvar != nullptr) {
         if (cvar->Type == ConsoleVariableType::Integer) {
@@ -306,25 +329,12 @@ ConsoleWindow::~ConsoleWindow() {
 
 // Returns the cached ConsoleWindow instance for use in static command handlers.
 static std::shared_ptr<ConsoleWindow> GetCachedConsoleWindow() {
-    static std::weak_ptr<ConsoleWindow> sCache;
-    auto cached = sCache.lock();
-    if (!cached) {
-        auto ctx = Context::GetCurrent();
-        if (!ctx) {
-            return nullptr;
-        }
-        auto window = ctx->GetChildren().GetFirst<Window>();
-        if (!window || !window->GetGui()) {
-            return nullptr;
-        }
-        cached = std::static_pointer_cast<ConsoleWindow>(window->GetGui()->GetGuiWindow("Console"));
-        sCache = cached;
-    }
-    return cached;
+    return sCachedConsoleWindow.lock();
 }
 
 void ConsoleWindow::OnInit(const nlohmann::json& initArgs) {
     GuiWindow::OnInit(initArgs);
+    sCachedConsoleWindow = std::dynamic_pointer_cast<ConsoleWindow>(GetSharedComponent());
     mInputBuffer = new char[gMaxBufferSize];
     strcpy(mInputBuffer, "");
     mFilterBuffer = new char[gMaxBufferSize];

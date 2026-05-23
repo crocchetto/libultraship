@@ -62,12 +62,6 @@ namespace Ship {
 class Context : public Component {
   public:
     /**
-     * @brief Returns the currently active global Context instance.
-     * @return Shared pointer to the Context, or an empty pointer if none exists.
-     */
-    static std::shared_ptr<Context> GetCurrent();
-
-    /**
      * @brief Creates and stores the global Context instance with the default set of components.
      *
      * This is the convenience factory that replicates the original initialization order:
@@ -205,8 +199,6 @@ class Context : public Component {
     Context() = default;
 
   private:
-    static std::weak_ptr<Context> mContext;
-
     std::string mShortName;
     std::chrono::steady_clock::time_point mLastTickTime{};
 

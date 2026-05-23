@@ -96,6 +96,8 @@ class CrashHandler : public Component {
 #endif
 
   private:
+    void OnAdded(bool forced) override;
+
     CrashHandlerCallback mCallback = nullptr;
     std::unique_ptr<char[]> mOutBuffer;
     static constexpr size_t gMaxBufferSize = 32768;

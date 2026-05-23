@@ -1,5 +1,4 @@
 #include "libultraship/bridge/resourcebridge.h"
-#include "ship/Context.h"
 #include "ship/resource/ResourceManager.h"
 #include <string>
 #include <algorithm>
@@ -8,10 +7,15 @@
 
 static std::shared_ptr<Ship::ResourceManager> sResourceManager;
 
+void ResourceSetResourceManager(std::shared_ptr<Ship::ResourceManager> resourceManager) {
+    sResourceManager = std::move(resourceManager);
+}
+
+std::shared_ptr<Ship::ResourceManager> ResourceGetResourceManager() {
+    return sResourceManager;
+}
+
 static Ship::ResourceManager* GetResourceManager() {
-    if (!sResourceManager) {
-        sResourceManager = Ship::Context::GetCurrent()->GetChildren().GetFirst<Ship::ResourceManager>();
-    }
     return sResourceManager.get();
 }
 

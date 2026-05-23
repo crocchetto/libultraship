@@ -1,15 +1,19 @@
 #include "libultraship/bridge/gfxdebuggerbridge.h"
-#include "ship/Context.h"
 #include "fast/debug/GfxDebugger.h"
 
 // Dependency: requires Fast::GfxDebugger component to be present in Ship::Context.
 
 static std::shared_ptr<Fast::GfxDebugger> sGfxDebugger;
 
+void GfxDebuggerSetComponent(std::shared_ptr<Fast::GfxDebugger> gfxDebugger) {
+    sGfxDebugger = std::move(gfxDebugger);
+}
+
+std::shared_ptr<Fast::GfxDebugger> GfxDebuggerGetComponent() {
+    return sGfxDebugger;
+}
+
 static Fast::GfxDebugger* GetGfxDebugger() {
-    if (!sGfxDebugger) {
-        sGfxDebugger = Ship::Context::GetCurrent()->GetChildren().GetFirst<Fast::GfxDebugger>();
-    }
     return sGfxDebugger.get();
 }
 
