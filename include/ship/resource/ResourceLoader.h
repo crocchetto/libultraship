@@ -139,8 +139,8 @@ class ResourceLoader {
      * @param document Parsed XML document containing the header.
      * @return Populated ResourceInitData, or nullptr on failure.
      */
-    static std::shared_ptr<ResourceInitData> ReadResourceInitDataXml(const std::string& filePath,
-                                                                     std::shared_ptr<tinyxml2::XMLDocument> document);
+    std::shared_ptr<ResourceInitData> ReadResourceInitDataXml(const std::string& filePath,
+                                                              std::shared_ptr<tinyxml2::XMLDocument> document);
 
     /**
      * @brief Reads a PNG image header to produce ResourceInitData.
