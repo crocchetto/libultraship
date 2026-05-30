@@ -4857,6 +4857,21 @@ std::shared_ptr<GfxDebugger> Interpreter::GetGfxDebugger() const {
     return mGfxDebugger;
 }
 
+void Interpreter::SetFast3dWindow(std::shared_ptr<Fast3dWindow> window) {
+    mFast3dWindow = std::move(window);
+}
+
+std::weak_ptr<Fast3dWindow> Interpreter::GetFast3dWindow() const {
+    return mFast3dWindow;
+}
+
+std::shared_ptr<Fast3dWindow> Interpreter::GetCurrentWindow() {
+    if (auto inst = mInstance.lock()) {
+        return inst->GetFast3dWindow().lock();
+    }
+    return nullptr;
+}
+
 void Interpreter::HandleWindowEvents() {
     mWapi->HandleEvents();
 }

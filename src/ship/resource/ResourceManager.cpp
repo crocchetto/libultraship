@@ -59,7 +59,8 @@ void ResourceManager::OnInit(const nlohmann::json& initArgs) {
     auto hashesVec = initArgs.value("validHashes", std::vector<uint32_t>{});
     std::unordered_set<uint32_t> validHashes(hashesVec.begin(), hashesVec.end());
 
-    mResourceLoader = std::make_shared<ResourceLoader>(std::dynamic_pointer_cast<ResourceManager>(GetSharedComponent()));
+    mResourceLoader =
+        std::make_shared<ResourceLoader>(std::dynamic_pointer_cast<ResourceManager>(GetSharedComponent()));
     mArchiveManager =
         std::make_shared<ArchiveManager>(std::dynamic_pointer_cast<ResourceManager>(GetSharedComponent()), mKeystore);
     GetArchiveManager()->Init(archivePaths, validHashes);

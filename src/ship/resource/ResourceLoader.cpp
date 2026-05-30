@@ -12,7 +12,8 @@
 #include "nlohmann/json.hpp"
 
 namespace Ship {
-ResourceLoader::ResourceLoader(std::shared_ptr<ResourceManager> resourceManager) : mResourceManager(std::move(resourceManager)) {
+ResourceLoader::ResourceLoader(std::shared_ptr<ResourceManager> resourceManager)
+    : mResourceManager(std::move(resourceManager)) {
     RegisterGlobalResourceFactories();
 }
 

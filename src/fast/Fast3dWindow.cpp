@@ -24,8 +24,6 @@ namespace Fast {
 
 extern void GfxSetInstance(std::shared_ptr<Interpreter> gfx);
 
-std::weak_ptr<Fast3dWindow> Fast3dWindow::sCurrentWindow;
-
 Fast3dWindow::Fast3dWindow(std::shared_ptr<Ship::Gui> gui, std::shared_ptr<FastMouseStateManager> mouseStateManager,
                            std::shared_ptr<Ship::Config> config,
                            std::shared_ptr<Ship::ConsoleVariable> consoleVariables,
@@ -72,9 +70,6 @@ Fast3dWindow::Fast3dWindow(std::shared_ptr<Ship::Config> config,
 
 Fast3dWindow::~Fast3dWindow() {
     SPDLOG_DEBUG("destruct fast3dwindow");
-    if (auto self = sCurrentWindow.lock(); self && self.get() == this) {
-        sCurrentWindow.reset();
-    }
     mInterpreter->Destroy();
     delete mRenderingApi;
     delete mWindowManagerApi;
@@ -82,7 +77,8 @@ Fast3dWindow::~Fast3dWindow() {
 
 void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
     Window::OnInit(initArgs);
-    sCurrentWindow = std::dynamic_pointer_cast<Fast3dWindow>(GetSharedComponent());
+    auto self = std::dynamic_pointer_cast<Fast3dWindow>(GetSharedComponent());
+    mInterpreter->SetFast3dWindow(self);
     bool gameMode = false;
 
 #ifdef __linux__
@@ -137,7 +133,6 @@ void Fast3dWindow::OnInit(const nlohmann::json& initArgs) {
         auto gfxDebugger = mGfxDebugger;
         auto resourceManager =
             RequireDependency(GetContext()->GetChildren().GetFirst<Ship::ResourceManager>(), "ResourceManager");
-        auto self = std::dynamic_pointer_cast<Fast3dWindow>(GetSharedComponent());
         GetGui()->AddGuiWindow(std::make_shared<LUS::GfxDebuggerWindow>(CVAR_GFX_DEBUGGER_WINDOW_OPEN, "Gfx Debugger",
                                                                         self, gfxDebugger, resourceManager));
     }
@@ -182,8 +177,8 @@ void Fast3dWindow::InitWindowManager() {
             mWindowManagerApi =
                 new GfxWindowBackendSDL2(GetConfig(), GetContext()->GetChildren().GetFirst<Ship::FileDrop>(),
                                          GetConsoleVariables(), std::dynamic_pointer_cast<Fast::Fast3dGui>(GetGui()));
-            mRenderingApi =
-                new GfxRenderingAPIOGL(GetConsoleVariables(), GetContext()->GetChildren().GetFirst<Ship::ResourceManager>());
+            mRenderingApi = new GfxRenderingAPIOGL(GetConsoleVariables(),
+                                                   GetContext()->GetChildren().GetFirst<Ship::ResourceManager>());
             break;
 #endif
 #ifdef __APPLE__
@@ -383,7 +378,7 @@ const char* Fast3dWindow::GetKeyName(int32_t scancode) {
 }
 
 bool Fast3dWindow::KeyUp(int32_t scancode) {
-    auto wnd = sCurrentWindow.lock();
+    auto wnd = Interpreter::GetCurrentWindow();
     if (!wnd) {
         return false;
     }
@@ -402,7 +397,7 @@ bool Fast3dWindow::KeyUp(int32_t scancode) {
 }
 
 bool Fast3dWindow::KeyDown(int32_t scancode) {
-    auto wnd = sCurrentWindow.lock();
+    auto wnd = Interpreter::GetCurrentWindow();
     if (!wnd) {
         return false;
     }
@@ -414,7 +409,7 @@ bool Fast3dWindow::KeyDown(int32_t scancode) {
 }
 
 void Fast3dWindow::AllKeysUp() {
-    auto wnd = sCurrentWindow.lock();
+    auto wnd = Interpreter::GetCurrentWindow();
     if (!wnd) {
         return;
     }
@@ -424,7 +419,7 @@ void Fast3dWindow::AllKeysUp() {
 }
 
 bool Fast3dWindow::MouseButtonUp(int button) {
-    auto wnd = sCurrentWindow.lock();
+    auto wnd = Interpreter::GetCurrentWindow();
     if (!wnd) {
         return false;
     }
@@ -433,7 +428,7 @@ bool Fast3dWindow::MouseButtonUp(int button) {
 }
 
 bool Fast3dWindow::MouseButtonDown(int button) {
-    auto wnd = sCurrentWindow.lock();
+    auto wnd = Interpreter::GetCurrentWindow();
     if (!wnd) {
         return false;
     }
@@ -442,7 +437,7 @@ bool Fast3dWindow::MouseButtonDown(int button) {
 }
 
 void Fast3dWindow::OnFullscreenChanged(bool isNowFullscreen) {
-    auto wnd = sCurrentWindow.lock();
+    auto wnd = Interpreter::GetCurrentWindow();
     if (!wnd) {
         return;
     }

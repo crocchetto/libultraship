@@ -202,10 +202,10 @@ static void ErrorHandler(int sig, siginfo_t* sigInfo, void* data) {
         snprintf(intToCharBuffer, sizeof(intToCharBuffer), "%i ", (int)i);
         WRITE_VAR_LINE(crashHandler, intToCharBuffer, functionName.c_str());
     }
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, (GetCrashAppName() + " has crashed").c_str(),
-                             (GetCrashAppName() + " has crashed. Please upload the logs to the support channel in discord.")
-                                 .c_str(),
-                             nullptr);
+    SDL_ShowSimpleMessageBox(
+        SDL_MESSAGEBOX_ERROR, (GetCrashAppName() + " has crashed").c_str(),
+        (GetCrashAppName() + " has crashed. Please upload the logs to the support channel in discord.").c_str(),
+        nullptr);
     free(symbols);
     crashHandler->PrintCommon();
 
@@ -422,10 +422,9 @@ extern "C" LONG WINAPI seh_filter(PEXCEPTION_POINTERS ex) {
 
     WRITE_VAR_LINE(crashHandler, "Exception: ", exceptionString);
     crashHandler->PrintStack(ex->ContextRecord);
-    MessageBoxA(
-        nullptr,
-        (GetCrashAppName() + " has crashed. Please upload the logs to the support channel in discord.").c_str(),
-        "Crash", MB_OK | MB_ICONERROR);
+    MessageBoxA(nullptr,
+                (GetCrashAppName() + " has crashed. Please upload the logs to the support channel in discord.").c_str(),
+                "Crash", MB_OK | MB_ICONERROR);
 
     return EXCEPTION_EXECUTE_HANDLER;
 }

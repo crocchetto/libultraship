@@ -208,7 +208,8 @@ const SDL_Scancode scancode_rmapping_nonextended[][2] = { { SDL_SCANCODE_KP_7, S
                                                           { SDL_SCANCODE_KP_PERIOD, SDL_SCANCODE_DELETE },
                                                           { SDL_SCANCODE_KP_MULTIPLY, SDL_SCANCODE_PRINTSCREEN } };
 
-GfxWindowBackendSDL2::GfxWindowBackendSDL2(std::shared_ptr<Ship::Config> config, std::shared_ptr<Ship::FileDrop> fileDrop,
+GfxWindowBackendSDL2::GfxWindowBackendSDL2(std::shared_ptr<Ship::Config> config,
+                                           std::shared_ptr<Ship::FileDrop> fileDrop,
                                            std::shared_ptr<Ship::ConsoleVariable> consoleVariable,
                                            std::shared_ptr<Fast::Fast3dGui> fast3dGui)
     : mConsoleVariable(std::move(consoleVariable)), mConfig(std::move(config)), mFileDrop(std::move(fileDrop)),

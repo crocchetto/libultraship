@@ -132,6 +132,20 @@ class ResourceManager : public Component {
                                             std::shared_ptr<ResourceInitData> initData = nullptr);
 
     /**
+     * @brief Loads a resource synchronously, cast to the concrete type T.
+     * @tparam T        Concrete resource type (must derive from IResource).
+     * @param filePath  Virtual path of the resource.
+     * @param loadExact If true, skips alt-asset path resolution.
+     * @param initData  Optional metadata overrides.
+     * @return Loaded (or cached) resource cast to T, or nullptr on failure.
+     */
+    template <typename T>
+    std::shared_ptr<T> LoadResource(const std::string& filePath, bool loadExact = false,
+                                    std::shared_ptr<ResourceInitData> initData = nullptr) {
+        return std::static_pointer_cast<T>(LoadResource(filePath, loadExact, std::move(initData)));
+    }
+
+    /**
      * @brief Loads a resource synchronously by ResourceIdentifier.
      * @param identifier Exact identifier (path + owner + parent archive).
      * @param loadExact  If true, skips alt-asset path resolution.
@@ -140,6 +154,20 @@ class ResourceManager : public Component {
      */
     std::shared_ptr<IResource> LoadResource(const ResourceIdentifier& identifier, bool loadExact = false,
                                             std::shared_ptr<ResourceInitData> initData = nullptr);
+
+    /**
+     * @brief Loads a resource synchronously by ResourceIdentifier, cast to the concrete type T.
+     * @tparam T         Concrete resource type (must derive from IResource).
+     * @param identifier Exact identifier (path + owner + parent archive).
+     * @param loadExact  If true, skips alt-asset path resolution.
+     * @param initData   Optional metadata overrides.
+     * @return Loaded (or cached) resource cast to T, or nullptr on failure.
+     */
+    template <typename T>
+    std::shared_ptr<T> LoadResource(const ResourceIdentifier& identifier, bool loadExact = false,
+                                    std::shared_ptr<ResourceInitData> initData = nullptr) {
+        return std::static_pointer_cast<T>(LoadResource(identifier, loadExact, std::move(initData)));
+    }
 
     /**
      * @brief Loads a resource synchronously by content-hash CRC.

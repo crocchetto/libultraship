@@ -14,7 +14,8 @@ class Fast3dGui;
 
 class GfxWindowBackendSDL2 final : public GfxWindowBackend {
   public:
-    GfxWindowBackendSDL2(std::shared_ptr<Ship::Config> config = nullptr, std::shared_ptr<Ship::FileDrop> fileDrop = nullptr,
+    GfxWindowBackendSDL2(std::shared_ptr<Ship::Config> config = nullptr,
+                         std::shared_ptr<Ship::FileDrop> fileDrop = nullptr,
                          std::shared_ptr<Ship::ConsoleVariable> consoleVariable = nullptr,
                          std::shared_ptr<Fast::Fast3dGui> fast3dGui = nullptr);
     ~GfxWindowBackendSDL2() override;

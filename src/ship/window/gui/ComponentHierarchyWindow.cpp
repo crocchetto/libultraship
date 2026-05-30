@@ -6,30 +6,30 @@
 namespace Ship {
 
 ComponentHierarchyWindow::ComponentHierarchyWindow(std::shared_ptr<ConsoleVariable> consoleVariable,
-                                                   std::shared_ptr<Window> window, std::shared_ptr<Context> context,
-                                                   const std::string& visibilityCvar, const std::string& name)
+                                                   std::shared_ptr<Window> window, const std::string& visibilityCvar,
+                                                   const std::string& name)
     : GuiWindow(std::move(consoleVariable), std::move(window), visibilityCvar, false, name, ImVec2{ 600, 400 },
-                ImGuiWindowFlags_None),
-      mContext(std::move(context)) {
+                ImGuiWindowFlags_None) {
 }
 
 ComponentHierarchyWindow::~ComponentHierarchyWindow() {
 }
 
 void ComponentHierarchyWindow::DrawElement() {
-    if (!mContext) {
+    auto context = GetContext();
+    if (!context) {
         ImGui::TextUnformatted("No context available.");
         return;
     }
 
     if (ImGui::BeginChild("##component_tree", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true)) {
         ImGui::SeparatorText("Component Hierarchy");
-        std::string tree = mContext->ToTreeString();
+        std::string tree = context->ToTreeString();
         ImGui::TextUnformatted(tree.c_str());
 
         ImGui::Spacing();
         ImGui::SeparatorText("Tickable Components");
-        for (const auto& tickable : *mContext->GetTickableComponents().Get()) {
+        for (const auto& tickable : *context->GetTickableComponents().Get()) {
             ImGui::BulletText("%s", tickable->GetName().c_str());
         }
     }

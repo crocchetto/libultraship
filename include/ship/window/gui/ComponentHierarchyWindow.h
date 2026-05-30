@@ -4,7 +4,6 @@
 #include <memory>
 
 namespace Ship {
-class Context;
 class ConsoleVariable;
 class Window;
 
@@ -19,14 +18,10 @@ class Window;
 class ComponentHierarchyWindow : public GuiWindow {
   public:
     ComponentHierarchyWindow(std::shared_ptr<ConsoleVariable> consoleVariable, std::shared_ptr<Window> window,
-                             std::shared_ptr<Context> context, const std::string& visibilityCvar,
-                             const std::string& name);
+                             const std::string& visibilityCvar, const std::string& name);
     virtual ~ComponentHierarchyWindow();
 
   protected:
     void DrawElement() override;
-
-  private:
-    std::shared_ptr<Context> mContext;
 };
 } // namespace Ship

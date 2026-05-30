@@ -10,11 +10,10 @@
 
 namespace Ship {
 
-int32_t ConsoleWindow::HelpCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                   std::string* output) {
+int32_t ConsoleWindow::HelpCommand(const std::vector<std::string>& args, std::string* output) {
     if (output) {
         *output += "Commands:";
-        for (const auto& cmd : console->GetCommands()) {
+        for (const auto& cmd : mConsole->GetCommands()) {
             *output += "\n - " + cmd.first + ": " + cmd.second.Description;
 
             if (!cmd.second.Arguments.empty()) {
@@ -45,14 +44,12 @@ int32_t ConsoleWindow::HelpCommand(std::shared_ptr<Console> console, const std::
     return 1;
 }
 
-int32_t ConsoleWindow::ClearCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                    std::string* output) {
+int32_t ConsoleWindow::ClearCommand(const std::vector<std::string>& args, std::string* output) {
     ClearLogs(GetCurrentChannel());
     return 0;
 }
 
-int32_t ConsoleWindow::UnbindCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                     std::string* output) {
+int32_t ConsoleWindow::UnbindCommand(const std::vector<std::string>& args, std::string* output) {
     if (args.size() > 1) {
         for (int k = ImGuiKey_NamedKey_BEGIN; k < ImGuiKey_NamedKey_END; k++) {
             std::string key(ImGui::GetKeyName((ImGuiKey)k));
@@ -95,8 +92,7 @@ int32_t ConsoleWindow::UnbindCommand(std::shared_ptr<Console> console, const std
     return 0;
 }
 
-int32_t ConsoleWindow::BindCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                   std::string* output) {
+int32_t ConsoleWindow::BindCommand(const std::vector<std::string>& args, std::string* output) {
     if (args.size() > 2) {
         for (int k = ImGuiKey_NamedKey_BEGIN; k < ImGuiKey_NamedKey_END; k++) {
             std::string key(ImGui::GetKeyName((ImGuiKey)k));
@@ -123,8 +119,7 @@ int32_t ConsoleWindow::BindCommand(std::shared_ptr<Console> console, const std::
     return 0;
 }
 
-int32_t ConsoleWindow::BindToggleCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                         std::string* output) {
+int32_t ConsoleWindow::BindToggleCommand(const std::vector<std::string>& args, std::string* output) {
     if (args.size() > 2) {
         for (int k = ImGuiKey_NamedKey_BEGIN; k < ImGuiKey_NamedKey_END; k++) {
             std::string key(ImGui::GetKeyName((ImGuiKey)k));
@@ -150,8 +145,7 @@ int32_t ConsoleWindow::BindToggleCommand(std::shared_ptr<Console> console, const
 #define VARTYPE_STRING 2
 #define VARTYPE_RGBA 3
 
-int32_t ConsoleWindow::SetCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                  std::string* output) {
+int32_t ConsoleWindow::SetCommand(const std::vector<std::string>& args, std::string* output) {
     if (args.size() < 3) {
         if (output) {
             *output += "Not enough arguments.";
@@ -191,8 +185,7 @@ int32_t ConsoleWindow::SetCommand(std::shared_ptr<Console> console, const std::v
     return 0;
 }
 
-int32_t ConsoleWindow::GetCommand(std::shared_ptr<Console> console, const std::vector<std::string>& args,
-                                  std::string* output) {
+int32_t ConsoleWindow::GetCommand(const std::vector<std::string>& args, std::string* output) {
     if (args.size() < 2) {
         if (output) {
             *output += "Not enough arguments.";
@@ -290,75 +283,67 @@ void ConsoleWindow::OnInit(const nlohmann::json& initArgs) {
 
     std::weak_ptr<ConsoleWindow> weakSelf = std::dynamic_pointer_cast<ConsoleWindow>(GetSharedComponent());
 
-    mConsole->AddCommand(
-        "set", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                            std::string* output) -> int32_t {
-                    if (auto self = weakSelf.lock()) {
-                        return self->SetCommand(std::move(console), std::move(args), output);
-                    }
-                    return 1;
-                },
-                 "Sets a console variable.",
-                 { { "varName", ArgumentType::TEXT }, { "varValue", ArgumentType::TEXT } } });
-    mConsole->AddCommand(
-        "get", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                            std::string* output) -> int32_t {
-                    if (auto self = weakSelf.lock()) {
-                        return self->GetCommand(std::move(console), std::move(args), output);
-                    }
-                    return 1;
-                },
-                 "Gets a console variable",
-                 { { "varName", ArgumentType::TEXT } } });
-    mConsole->AddCommand(
-        "help", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                             std::string* output) -> int32_t {
-                     if (auto self = weakSelf.lock()) {
-                         return self->HelpCommand(std::move(console), std::move(args), output);
-                     }
-                     return 1;
-                 },
-                  "Shows all the commands" });
-    mConsole->AddCommand(
-        "clear", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                              std::string* output) -> int32_t {
-                      if (auto self = weakSelf.lock()) {
-                          return self->ClearCommand(std::move(console), std::move(args), output);
-                      }
-                      return 1;
-                  },
-                   "Clear the console history" });
-    mConsole->AddCommand(
-        "unbind", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                               std::string* output) -> int32_t {
-                       if (auto self = weakSelf.lock()) {
-                           return self->UnbindCommand(std::move(console), std::move(args), output);
-                       }
-                       return 1;
-                   },
-                    "Unbinds a key",
-                    { { "key", ArgumentType::TEXT } } });
-    mConsole->AddCommand(
-        "bind", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                             std::string* output) -> int32_t {
-                     if (auto self = weakSelf.lock()) {
-                         return self->BindCommand(std::move(console), std::move(args), output);
-                     }
-                     return 1;
-                 },
-                  "Binds key to commands",
-                  { { "key", ArgumentType::TEXT }, { "cmd", ArgumentType::TEXT } } });
-    mConsole->AddCommand(
-        "bind-toggle",
-        { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
-                     std::string* output) -> int32_t {
-             if (auto self = weakSelf.lock()) {
-                 return self->BindToggleCommand(std::move(console), std::move(args), output);
-             }
-             return 1;
-         },
-          "Bind key as a bool toggle",
-          { { "key", ArgumentType::TEXT }, { "cmd", ArgumentType::TEXT } } });
+    mConsole->AddCommand("set", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                             std::string* output) -> int32_t {
+                                     if (auto self = weakSelf.lock()) {
+                                         return self->SetCommand(std::move(args), output);
+                                     }
+                                     return 1;
+                                 },
+                                  "Sets a console variable.",
+                                  { { "varName", ArgumentType::TEXT }, { "varValue", ArgumentType::TEXT } } });
+    mConsole->AddCommand("get", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                             std::string* output) -> int32_t {
+                                     if (auto self = weakSelf.lock()) {
+                                         return self->GetCommand(std::move(args), output);
+                                     }
+                                     return 1;
+                                 },
+                                  "Gets a console variable",
+                                  { { "varName", ArgumentType::TEXT } } });
+    mConsole->AddCommand("help", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                              std::string* output) -> int32_t {
+                                      if (auto self = weakSelf.lock()) {
+                                          return self->HelpCommand(std::move(args), output);
+                                      }
+                                      return 1;
+                                  },
+                                   "Shows all the commands" });
+    mConsole->AddCommand("clear", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                               std::string* output) -> int32_t {
+                                       if (auto self = weakSelf.lock()) {
+                                           return self->ClearCommand(std::move(args), output);
+                                       }
+                                       return 1;
+                                   },
+                                    "Clear the console history" });
+    mConsole->AddCommand("unbind", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                                std::string* output) -> int32_t {
+                                        if (auto self = weakSelf.lock()) {
+                                            return self->UnbindCommand(std::move(args), output);
+                                        }
+                                        return 1;
+                                    },
+                                     "Unbinds a key",
+                                     { { "key", ArgumentType::TEXT } } });
+    mConsole->AddCommand("bind", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                              std::string* output) -> int32_t {
+                                      if (auto self = weakSelf.lock()) {
+                                          return self->BindCommand(std::move(args), output);
+                                      }
+                                      return 1;
+                                  },
+                                   "Binds key to commands",
+                                   { { "key", ArgumentType::TEXT }, { "cmd", ArgumentType::TEXT } } });
+    mConsole->AddCommand("bind-toggle", { [weakSelf](std::shared_ptr<Console> console, std::vector<std::string> args,
+                                                     std::string* output) -> int32_t {
+                                             if (auto self = weakSelf.lock()) {
+                                                 return self->BindToggleCommand(std::move(args), output);
+                                             }
+                                             return 1;
+                                         },
+                                          "Bind key as a bool toggle",
+                                          { { "key", ArgumentType::TEXT }, { "cmd", ArgumentType::TEXT } } });
 }
 
 void ConsoleWindow::UpdateElement() {
