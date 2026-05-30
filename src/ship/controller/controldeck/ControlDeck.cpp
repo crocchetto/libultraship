@@ -30,7 +30,7 @@ void ControlDeck::Init(uint8_t* controllerBits) {
     mControllerBits = controllerBits;
     *mControllerBits |= 1 << 0;
 
-    WheelHandler::GetInstance(mWindow);
+    mWheelHandler = std::make_shared<WheelHandler>(GetWindow());
 
     for (auto port : mPorts) {
         if (port->GetConnectedController()->HasConfig()) {
@@ -121,6 +121,13 @@ std::shared_ptr<GlobalSDLDeviceSettings> ControlDeck::GetGlobalSDLDeviceSettings
 
 std::shared_ptr<ControllerDefaultMappings> ControlDeck::GetControllerDefaultMappings() {
     return mControllerDefaultMappings;
+}
+
+std::shared_ptr<WheelHandler> ControlDeck::GetWheelHandler() const {
+    if (!mWheelHandler) {
+        throw std::runtime_error("ControlDeck requires WheelHandler to be initialized");
+    }
+    return mWheelHandler;
 }
 
 const std::unordered_map<CONTROLLERBUTTONS_T, std::string>& ControlDeck::GetAllButtonNames() const {

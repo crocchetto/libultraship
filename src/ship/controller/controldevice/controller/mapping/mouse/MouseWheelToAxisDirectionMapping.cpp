@@ -23,7 +23,7 @@ float MouseWheelToAxisDirectionMapping::GetNormalizedAxisDirectionValue() {
         return 0.0f;
     }
 
-    if (WheelHandler::GetInstance()->GetBufferedDirectionValue(mWheelDirection) > 0) {
+    if (mControlDeck->GetWheelHandler()->GetBufferedDirectionValue(mWheelDirection) > 0) {
         return MAX_AXIS_RANGE;
     } else {
         return 0.0f;

@@ -387,7 +387,6 @@ class Interpreter {
     void SetGfxDebugger(std::shared_ptr<GfxDebugger> debugger);
     std::shared_ptr<GfxDebugger> GetGfxDebugger() const;
     void SetFast3dWindow(std::shared_ptr<Fast3dWindow> window);
-    std::weak_ptr<Fast3dWindow> GetFast3dWindow() const;
     static std::shared_ptr<Fast3dWindow> GetCurrentWindow();
     void GetDimensions(uint32_t* width, uint32_t* height, int32_t* posX, int32_t* posY);
     GfxRenderingAPI* GetCurrentRenderingAPI();

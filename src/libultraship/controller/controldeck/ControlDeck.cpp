@@ -4,8 +4,8 @@
 #include "libultraship/controller/controldevice/controller/Controller.h"
 #include "libultraship/controller/controldevice/controller/mapping/ControllerDefaultMappings.h"
 #include "ship/utils/StringHelper.h"
-#include <imgui.h>
 #include "ship/controller/controldevice/controller/mapping/mouse/WheelHandler.h"
+#include <imgui.h>
 
 namespace LUS {
 ControlDeck::ControlDeck(std::vector<CONTROLLERBUTTONS_T> additionalBitmasks,
@@ -55,7 +55,7 @@ void ControlDeck::WriteToPad(void* pad) {
 
 void ControlDeck::WriteToOSContPad(OSContPad* pad) {
     SDL_PumpEvents();
-    Ship::WheelHandler::GetInstance()->Update();
+    GetWheelHandler()->Update();
 
     if (AllGameInputBlocked()) {
         return;

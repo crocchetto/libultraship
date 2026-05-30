@@ -12,6 +12,7 @@
 #include "ship/window/Window.h"
 
 namespace Ship {
+class WheelHandler;
 
 /**
  * @brief Manages all controller ports and routes input/blocking requests.
@@ -114,6 +115,8 @@ class ControlDeck : public Component {
     std::shared_ptr<GlobalSDLDeviceSettings> GetGlobalSDLDeviceSettings();
     /** @brief Returns the default mapping configuration applied to new controllers. */
     std::shared_ptr<ControllerDefaultMappings> GetControllerDefaultMappings();
+    /** @brief Returns the cached wheel handler. */
+    std::shared_ptr<WheelHandler> GetWheelHandler() const;
     /**
      * @brief Returns the full bitmask→name map for all registered buttons.
      */
@@ -144,6 +147,7 @@ class ControlDeck : public Component {
     std::unordered_map<CONTROLLERBUTTONS_T, std::string> mButtonNames;
     std::shared_ptr<Window> mWindow;
     std::shared_ptr<ConsoleVariable> mConsoleVariables;
+    std::shared_ptr<WheelHandler> mWheelHandler;
 
     /** @brief Returns the cached Window component. */
     std::shared_ptr<Window> GetWindow() const;

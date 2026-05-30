@@ -2,6 +2,7 @@
 #include "ship/controller/controldevice/controller/mapping/keyboard/KeyboardKeyToAxisDirectionMapping.h"
 #include "ship/controller/controldevice/controller/mapping/mouse/MouseButtonToAxisDirectionMapping.h"
 #include "ship/controller/controldevice/controller/mapping/mouse/MouseWheelToAxisDirectionMapping.h"
+#include "ship/controller/controldevice/controller/mapping/mouse/WheelHandler.h"
 
 #include "ship/controller/controldevice/controller/mapping/sdl/SDLButtonToAxisDirectionMapping.h"
 #include "ship/controller/controldevice/controller/mapping/sdl/SDLAxisDirectionToAxisDirectionMapping.h"
@@ -10,8 +11,6 @@
 #include "ship/utils/StringHelper.h"
 
 #include "ship/controller/controldevice/controller/mapping/keyboard/KeyboardScancodes.h"
-#include "ship/controller/controldevice/controller/mapping/mouse/WheelHandler.h"
-
 #include "ship/controller/controldeck/ControlDeck.h"
 
 namespace Ship {
@@ -203,7 +202,7 @@ std::shared_ptr<ControllerAxisDirectionMapping>
 AxisDirectionMappingFactory::CreateAxisDirectionMappingFromMouseWheelInput(
     uint8_t portIndex, StickIndex stickIndex, Direction direction, std::shared_ptr<ConsoleVariable> consoleVariable,
     std::shared_ptr<ControlDeck> controlDeck) {
-    WheelDirections wheelDirections = WheelHandler::GetInstance()->GetDirections();
+    auto wheelDirections = controlDeck->GetWheelHandler()->GetDirections();
     WheelDirection wheelDirection;
     if (wheelDirections.X != LUS_WHEEL_NONE) {
         wheelDirection = wheelDirections.X;

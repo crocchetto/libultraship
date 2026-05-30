@@ -14,18 +14,6 @@ WheelHandler::WheelHandler(std::shared_ptr<Window> window) : mWindow(std::move(w
 WheelHandler::~WheelHandler() {
 }
 
-std::shared_ptr<WheelHandler> WheelHandler::mInstance;
-
-std::shared_ptr<WheelHandler> WheelHandler::GetInstance(std::shared_ptr<Window> window) {
-    if (mInstance == nullptr) {
-        if (!window) {
-            throw std::runtime_error("WheelHandler: Window required for first initialization");
-        }
-        mInstance = std::make_shared<WheelHandler>(std::move(window));
-    }
-    return mInstance;
-}
-
 void WheelHandler::UpdateAxisBuffer(float* buf, float input) {
     static const float LIMIT = 3.0f;
     static const float REDUCE_STEP = 1.0f;

@@ -4,10 +4,10 @@
 #include "ship/controller/controldevice/controller/mapping/keyboard/KeyboardKeyToButtonMapping.h"
 #include "ship/controller/controldevice/controller/mapping/mouse/MouseButtonToButtonMapping.h"
 #include "ship/controller/controldevice/controller/mapping/mouse/MouseWheelToButtonMapping.h"
+#include "ship/controller/controldevice/controller/mapping/mouse/WheelHandler.h"
 #include "ship/controller/controldevice/controller/mapping/sdl/SDLButtonToButtonMapping.h"
 #include "ship/controller/controldevice/controller/mapping/sdl/SDLAxisDirectionToButtonMapping.h"
 #include "ship/controller/controldevice/controller/mapping/keyboard/KeyboardScancodes.h"
-#include "ship/controller/controldevice/controller/mapping/mouse/WheelHandler.h"
 #include "ship/controller/controldeck/ControlDeck.h"
 
 namespace Ship {
@@ -170,7 +170,7 @@ std::shared_ptr<ControllerButtonMapping>
 ButtonMappingFactory::CreateButtonMappingFromMouseWheelInput(uint8_t portIndex, CONTROLLERBUTTONS_T bitmask,
                                                              std::shared_ptr<ConsoleVariable> consoleVariable,
                                                              std::shared_ptr<ControlDeck> controlDeck) {
-    WheelDirections wheelDirections = WheelHandler::GetInstance()->GetDirections();
+    auto wheelDirections = controlDeck->GetWheelHandler()->GetDirections();
     WheelDirection wheelDirection;
     if (wheelDirections.X != LUS_WHEEL_NONE) {
         wheelDirection = wheelDirections.X;
