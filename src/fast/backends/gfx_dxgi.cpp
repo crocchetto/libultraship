@@ -57,6 +57,7 @@ using QWORD = uint64_t; // For NEXTRAWINPUTBLOCK
 #define ALLOW_BACKGROUND_INPUTS_BLOCK_ID 95237930
 
 namespace Fast {
+using namespace Microsoft::WRL; // For ComPtr
 
 GfxWindowBackendDXGI::GfxWindowBackendDXGI(std::shared_ptr<Ship::Config> config,
                                            std::shared_ptr<Ship::FileDrop> fileDrop,

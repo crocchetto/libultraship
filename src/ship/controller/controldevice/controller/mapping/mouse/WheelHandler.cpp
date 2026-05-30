@@ -4,6 +4,9 @@
 
 namespace Ship {
 WheelHandler::WheelHandler(std::shared_ptr<Window> window) : mWindow(std::move(window)) {
+    if (!mWindow) {
+        throw std::runtime_error("WheelHandler requires Window dependency");
+    }
     mDirections = { LUS_WHEEL_NONE, LUS_WHEEL_NONE };
     mBufferedCoords = { 0.0f, 0.0f };
 }
@@ -45,7 +48,7 @@ void WheelHandler::UpdateAxisBuffer(float* buf, float input) {
 }
 
 void WheelHandler::Update() {
-    mCoords = GetWindow()->GetMouseWheel();
+    mCoords = mWindow->GetMouseWheel();
 
     UpdateAxisBuffer(&mBufferedCoords.x, mCoords.x);
     UpdateAxisBuffer(&mBufferedCoords.y, mCoords.y);
@@ -102,15 +105,5 @@ float WheelHandler::GetDirectionValue(WheelDirection direction) {
 
 float WheelHandler::GetBufferedDirectionValue(WheelDirection direction) {
     return CalcDirectionValue(mBufferedCoords, direction);
-}
-
-std::shared_ptr<Window> WheelHandler::GetWindow() const {
-    if (!mWindow) {
-        throw std::runtime_error("WheelHandler requires Window dependency");
-    }
-    if (!mWindow->IsInitialized()) {
-        throw std::runtime_error("WheelHandler requires Window to be initialized");
-    }
-    return mWindow;
 }
 } // namespace Ship

@@ -4,6 +4,7 @@
 #include "ship/config/Config.h"
 #include "ship/DefaultKeys.h"
 
+#include <spdlog/spdlog.h>
 #include <vector>
 
 namespace Ship {
